@@ -783,7 +783,6 @@ histograms_list_ind <-
 
 histograms_list_ind
 ```
-=
 ```{r}
 risk_protect_vars_table <- 
   cc2_preg_cal %>% 

@@ -26,7 +26,6 @@ Lucy S. King
         variables](#tables-for-categorical-variables)
       - [Histograms and descriptives for continuous and count
         variables](#histograms-and-descriptives-for-continuous-and-count-variables)
-  - [![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-15.png)<!-- -->](#section)
       - [Elastic net regression](#elastic-net-regression)
   - [Aim 4](#aim-4)
       - [OLS in full pregnancy sample](#ols-in-full-pregnancy-sample)
@@ -2521,7 +2520,7 @@ histograms_list_ind
 
     ## Warning: Removed 2 rows containing non-finite values (stat_bin).
 
-# ![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-15.png)<!-- -->
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-15.png)<!-- -->
 
 ``` r
 risk_protect_vars_table <- 
