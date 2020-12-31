@@ -1,0 +1,77 @@
+TITLE: COPE EFA of COVID-19 stress variables
+
+DATA: FILE = "~/Desktop/BABIES/COPE/covid_stress_vars_preg.dat";
+
+	
+VARIABLE: 
+
+NAMES = 	cope_id 
+	care_chg
+	birth_r
+	psupp_r
+	mcare_r
+	chealth_r
+	self_r
+	fam_r
+	cur_fin
+	c_fin_r
+	fut_fin
+	f_fin_r
+	s_dis_r
+	restric
+	acces_r
+	impact_r
+	impact_v
+	cov_conf
+	cov_pos;
+	
+USEVARIABLES = 
+	care_chg
+	birth_r
+	psupp_r
+	mcare_r
+	chealth_r
+	self_r
+	fam_r
+	cur_fin
+	c_fin_r
+	fut_fin
+	f_fin_r
+	s_dis_r
+	restric
+	acces_r
+	impact_r
+	impact_v;
+	
+	
+COUNT = 
+	care_chg
+	cur_fin 
+	fut_fin
+	restric;
+
+CENSORED = 
+	birth_r (b) ! censored from below (floor effect)
+    	psupp_r (b)
+     	mcare_r  (b)
+     	chealth_r (b);
+	
+MISSING = .;
+
+ANALYSIS:
+
+TYPE = EFA 1 3;
+!PARALLEL = 50; ! carry out parallel anlysis to determine number of factors; cannot compute using count or censored data
+
+ESTIMATOR = MLR; !uses FIML to handle missing data
+
+ROTATION = GEOMIN;
+
+INTEGRATION = MONTECARLO (5000);
+
+PROCESSORS = 2;
+
+ALGORITHM = EM;
+
+
+

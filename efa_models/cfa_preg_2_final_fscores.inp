@@ -1,0 +1,87 @@
+TITLE: COPE EFA of COVID-19 stress variables
+
+DATA: FILE = "~/Desktop/BABIES/COPE/covid_stress_vars_preg.dat";
+
+	
+VARIABLE: 
+
+NAMES = 	cope_id 
+	care_chg
+	birth_r
+	psupp_r
+	mcare_r
+	chealth_r
+	self_r
+	fam_r
+	cur_fin
+	c_fin_r
+	fut_fin
+	f_fin_r
+	s_dis_r
+	restric
+	acces_r
+	impact_r
+	impact_v;
+	
+USEVARIABLES = 
+	care_chg
+  	birth_r
+  	psupp_r
+  	mcare_r
+  	chealth_r
+  	self_r
+  	fam_r
+  	cur_fin
+  	fut_fin
+  	s_dis_r
+  	acces_r
+  	impact_r
+  	impact_v;  
+	
+	
+COUNT = 
+	care_chg
+	cur_fin 
+	fut_fin;
+
+CENSORED = 
+	birth_r (b) ! censored from below (floor effect)
+    	psupp_r (b)
+     	mcare_r  (b)
+     	chealth_r (b);
+     	
+	
+MISSING = .;
+
+MODEL:
+F1 BY care_chg@.999 cur_fin@1.024 fut_fin@.990; 
+
+F2 BY  
+birth_r@.537
+psupp_r@.510
+mcare_r@.463
+chealth_r@.554
+self_r@.624
+fam_r@.638
+s_dis_r@.474
+acces_r@.562
+impact_r@.485
+impact_v@-.462;
+
+
+F1@1;
+F2@1;
+F1 WITH F2@.409;
+
+SAVEDATA:
+
+SAVE = FSCORES;
+
+FILE = "cfa_pre_2_fscores.txt"
+
+!FORMAT IS free;
+
+OUTPUT: 
+STANDARDIZED RESIDUAL;
+
+

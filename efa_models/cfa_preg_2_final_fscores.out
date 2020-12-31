@@ -1,0 +1,785 @@
+Mplus VERSION 8.4 (Mac)
+MUTHEN & MUTHEN
+12/08/2020   9:57 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE: COPE EFA of COVID-19 stress variables
+
+  DATA: FILE = "~/Desktop/BABIES/COPE/covid_stress_vars_preg.dat";
+
+  	
+  VARIABLE:
+
+  NAMES = 	cope_id
+  	care_chg
+  	birth_r
+  	psupp_r
+  	mcare_r
+  	chealth_r
+  	self_r
+  	fam_r
+  	cur_fin
+  	c_fin_r
+  	fut_fin
+  	f_fin_r
+  	s_dis_r
+  	restric
+  	acces_r
+  	impact_r
+  	impact_v;
+  	
+  USEVARIABLES =
+  	care_chg
+    	birth_r
+    	psupp_r
+    	mcare_r
+    	chealth_r
+    	self_r
+    	fam_r
+    	cur_fin
+    	fut_fin
+    	s_dis_r
+    	acces_r
+    	impact_r
+    	impact_v;
+  	
+  	
+  COUNT =
+  	care_chg
+  	cur_fin
+  	fut_fin;
+
+  CENSORED =
+  	birth_r (b) ! censored from below (floor effect)
+      	psupp_r (b)
+       	mcare_r  (b)
+       	chealth_r (b);
+       	
+  	
+  MISSING = .;
+
+  MODEL:
+  F1 BY care_chg@.999 cur_fin@1.024 fut_fin@.990;
+
+  F2 BY
+  birth_r@.537
+  psupp_r@.510
+  mcare_r@.463
+  chealth_r@.554
+  self_r@.624
+  fam_r@.638
+  s_dis_r@.474
+  acces_r@.562
+  impact_r@.485
+  impact_v@-.462;
+
+
+  F1@1;
+  F2@1;
+  F1 WITH F2@.409;
+
+  SAVEDATA:
+
+  SAVE = FSCORES;
+
+  FILE = "cfa_pre_2_fscores.txt"
+
+  !FORMAT IS free;
+
+  OUTPUT:
+  STANDARDIZED RESIDUAL;
+
+
+
+
+
+*** WARNING in VARIABLE command
+  Note that only the first 8 characters of variable names are used in the output.
+  Shorten variable names to avoid any confusion.
+*** WARNING in SAVEDATA command
+  Statement not terminated by a semicolon:
+  FILE = "cfa_pre_2_fscores.txt"
+   2 WARNING(S) FOUND IN THE INPUT INSTRUCTIONS
+
+
+
+COPE EFA of COVID-19 stress variables
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         725
+
+Number of dependent variables                                   13
+Number of independent variables                                  0
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Continuous
+   SELF_R      FAM_R       S_DIS_R     ACCES_R     IMPACT_R    IMPACT_V
+
+  Censored
+   BIRTH_R     PSUPP_R     MCARE_R     CHEALTH_R
+
+  Count
+   CARE_CHG    CUR_FIN     FUT_FIN
+
+Continuous latent variables
+   F1          F2
+
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-02
+    Relative loglikelihood change                        0.100D-05
+    Derivative                                           0.100D-02
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+Optimization algorithm                                         EMA
+Integration Specifications
+  Type                                                    STANDARD
+  Number of integration points                                  15
+  Dimensions of numerical integration                            2
+  Adaptive quadrature                                           ON
+Cholesky                                                       OFF
+
+Input data file(s)
+  ~/Desktop/BABIES/COPE/covid_stress_vars_preg.dat
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of missing data patterns             2
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+     PROPORTION OF DATA PRESENT FOR Y
+
+
+           Covariance Coverage
+              SELF_R        FAM_R         S_DIS_R       ACCES_R       IMPACT_R
+              ________      ________      ________      ________      ________
+ SELF_R         1.000
+ FAM_R          1.000         1.000
+ S_DIS_R        1.000         1.000         1.000
+ ACCES_R        0.997         0.997         0.997         0.997
+ IMPACT_R       1.000         1.000         1.000         0.997         1.000
+ IMPACT_V       1.000         1.000         1.000         0.997         1.000
+
+
+           Covariance Coverage
+              IMPACT_V
+              ________
+ IMPACT_V       1.000
+
+
+SUMMARY OF CENSORED LIMITS
+
+      BIRTH_R            0.000
+      PSUPP_R            0.000
+      MCARE_R            0.000
+      CHEALTH_           0.000
+
+
+COUNT PROPORTION OF ZERO, MINIMUM AND MAXIMUM VALUES
+
+      CARE_CHG    0.113         0         6
+      CUR_FIN     0.030         0        19
+      FUT_FIN     0.201         0        22
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     SELF_R                1.865       0.706       0.000   39.72%       0.000      1.000      1.000
+             725.000       3.960      -0.813       6.000    7.17%       2.000      4.000
+     FAM_R                 3.306      -0.272       0.000   14.21%       1.000      3.000      4.000
+             725.000       4.055      -1.159       6.000   17.10%       4.000      5.000
+     S_DIS_R               2.763       0.002       0.000   19.59%       1.000      2.000      3.000
+             725.000       3.767      -1.192       6.000    8.28%       3.000      5.000
+     ACCES_R               1.468       0.167       0.000    1.24%       0.833      1.167      1.500
+             723.000       0.481      -0.579       3.000    2.35%       1.667      2.000
+     IMPACT_R              4.142      -0.371       0.000    0.14%       3.000      4.000      4.000
+             725.000       1.468      -0.137       6.000   14.34%       4.000      5.000
+     IMPACT_V             -1.742       1.188      -3.000   22.34%      -3.000     -2.000     -2.000
+             725.000       1.077       2.196       3.000    0.14%      -2.000     -1.000
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       23
+
+Loglikelihood
+
+          H0 Value                      -18614.108
+          H0 Scaling Correction Factor      1.0467
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                   37274.216
+          Bayesian (BIC)                 37379.698
+          Sample-Size Adjusted BIC       37306.666
+            (n* = (n + 2) / 24)
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    CARE_CHG           0.999      0.000    999.000    999.000
+    CUR_FIN            1.024      0.000    999.000    999.000
+    FUT_FIN            0.990      0.000    999.000    999.000
+
+ F2       BY
+    BIRTH_R            0.537      0.000    999.000    999.000
+    PSUPP_R            0.510      0.000    999.000    999.000
+    MCARE_R            0.463      0.000    999.000    999.000
+    CHEALTH_R          0.554      0.000    999.000    999.000
+    SELF_R             0.624      0.000    999.000    999.000
+    FAM_R              0.638      0.000    999.000    999.000
+    S_DIS_R            0.474      0.000    999.000    999.000
+    ACCES_R            0.562      0.000    999.000    999.000
+    IMPACT_R           0.485      0.000    999.000    999.000
+    IMPACT_V          -0.462      0.000    999.000    999.000
+
+ F1       WITH
+    F2                 0.409      0.000    999.000    999.000
+
+ Intercepts
+    SELF_R             1.865      0.074     25.237      0.000
+    FAM_R              3.306      0.075     44.212      0.000
+    S_DIS_R            2.763      0.072     38.330      0.000
+    ACCES_R            1.466      0.026     56.811      0.000
+    IMPACT_R           4.142      0.045     92.054      0.000
+    IMPACT_V          -1.742      0.039    -45.209      0.000
+    CARE_CHG           0.650      0.025     25.880      0.000
+    CUR_FIN            1.362      0.025     55.167      0.000
+    FUT_FIN            1.177      0.036     32.915      0.000
+    BIRTH_R            3.819      0.119     32.136      0.000
+    PSUPP_R            4.888      0.090     54.325      0.000
+    MCARE_R            2.667      0.193     13.854      0.000
+    CHEALTH_R          3.642      0.144     25.322      0.000
+
+ Variances
+    F1                 1.000      0.000    999.000    999.000
+    F2                 1.000      0.000    999.000    999.000
+
+ Residual Variances
+    SELF_R             3.232      0.136     23.737      0.000
+    FAM_R              3.185      0.129     24.689      0.000
+    S_DIS_R            3.147      0.113     27.942      0.000
+    ACCES_R            0.229      0.020     11.647      0.000
+    IMPACT_R           1.043      0.056     18.502      0.000
+    IMPACT_V           0.807      0.070     11.581      0.000
+    BIRTH_R            7.135      0.521     13.703      0.000
+    PSUPP_R            4.607      0.370     12.463      0.000
+    MCARE_R           15.535      1.003     15.485      0.000
+    CHEALTH_R          9.969      0.692     14.405      0.000
+
+
+STANDARDIZED MODEL RESULTS
+
+
+STDYX Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    CARE_CHG           1.000      0.000    999.000    999.000
+    CUR_FIN            1.000      0.000    999.000    999.000
+    FUT_FIN            1.000      0.000    999.000    999.000
+
+ F2       BY
+    BIRTH_R            0.197      0.007     28.514      0.000
+    PSUPP_R            0.231      0.009     26.333      0.000
+    MCARE_R            0.117      0.004     31.397      0.000
+    CHEALTH_R          0.173      0.006     29.697      0.000
+    SELF_R             0.328      0.006     53.192      0.000
+    FAM_R              0.337      0.006     55.689      0.000
+    S_DIS_R            0.258      0.004     59.874      0.000
+    ACCES_R            0.762      0.014     55.467      0.000
+    IMPACT_R           0.429      0.009     45.347      0.000
+    IMPACT_V          -0.457      0.016    -29.290      0.000
+
+ F1       WITH
+    F2                 0.409      0.000    999.000    999.000
+
+ Intercepts
+    SELF_R             0.980      0.033     29.780      0.000
+    FAM_R              1.745      0.058     30.334      0.000
+    S_DIS_R            1.505      0.048     31.212      0.000
+    ACCES_R            1.987      0.048     40.979      0.000
+    IMPACT_R           3.664      0.098     37.445      0.000
+    IMPACT_V          -1.725      0.087    -19.864      0.000
+    CARE_CHG           0.651      0.025     25.880      0.000
+    CUR_FIN            1.330      0.024     55.167      0.000
+    FUT_FIN            1.189      0.036     32.915      0.000
+    BIRTH_R            1.402      0.088     15.892      0.000
+    PSUPP_R            2.215      0.118     18.697      0.000
+    MCARE_R            0.672      0.068      9.849      0.000
+    CHEALTH_R          1.136      0.080     14.207      0.000
+
+ Variances
+    F1                 1.000      0.000    999.000    999.000
+    F2                 1.000      0.000    999.000    999.000
+
+ Residual Variances
+    SELF_R             0.892      0.004    220.787      0.000
+    FAM_R              0.887      0.004    217.868      0.000
+    S_DIS_R            0.933      0.002    419.332      0.000
+    ACCES_R            0.420      0.021     20.079      0.000
+    IMPACT_R           0.816      0.008    100.556      0.000
+    IMPACT_V           0.791      0.014     55.351      0.000
+    BIRTH_R            0.961      0.003    352.755      0.000
+    PSUPP_R            0.947      0.004    233.227      0.000
+    MCARE_R            0.986      0.001   1137.664      0.000
+    CHEALTH_R          0.970      0.002    482.302      0.000
+
+
+STDY Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    CARE_CHG           1.000      0.000    999.000    999.000
+    CUR_FIN            1.000      0.000    999.000    999.000
+    FUT_FIN            1.000      0.000    999.000    999.000
+
+ F2       BY
+    BIRTH_R            0.197      0.007     28.514      0.000
+    PSUPP_R            0.231      0.009     26.333      0.000
+    MCARE_R            0.117      0.004     31.397      0.000
+    CHEALTH_R          0.173      0.006     29.697      0.000
+    SELF_R             0.328      0.006     53.192      0.000
+    FAM_R              0.337      0.006     55.689      0.000
+    S_DIS_R            0.258      0.004     59.874      0.000
+    ACCES_R            0.762      0.014     55.467      0.000
+    IMPACT_R           0.429      0.009     45.347      0.000
+    IMPACT_V          -0.457      0.016    -29.290      0.000
+
+ F1       WITH
+    F2                 0.409      0.000    999.000    999.000
+
+ Intercepts
+    SELF_R             0.980      0.033     29.780      0.000
+    FAM_R              1.745      0.058     30.334      0.000
+    S_DIS_R            1.505      0.048     31.212      0.000
+    ACCES_R            1.987      0.048     40.979      0.000
+    IMPACT_R           3.664      0.098     37.445      0.000
+    IMPACT_V          -1.725      0.087    -19.864      0.000
+    CARE_CHG           0.651      0.025     25.880      0.000
+    CUR_FIN            1.330      0.024     55.167      0.000
+    FUT_FIN            1.189      0.036     32.915      0.000
+    BIRTH_R            1.402      0.088     15.892      0.000
+    PSUPP_R            2.215      0.118     18.697      0.000
+    MCARE_R            0.672      0.068      9.849      0.000
+    CHEALTH_R          1.136      0.080     14.207      0.000
+
+ Variances
+    F1                 1.000      0.000    999.000    999.000
+    F2                 1.000      0.000    999.000    999.000
+
+ Residual Variances
+    SELF_R             0.892      0.004    220.787      0.000
+    FAM_R              0.887      0.004    217.868      0.000
+    S_DIS_R            0.933      0.002    419.332      0.000
+    ACCES_R            0.420      0.021     20.079      0.000
+    IMPACT_R           0.816      0.008    100.556      0.000
+    IMPACT_V           0.791      0.014     55.351      0.000
+    BIRTH_R            0.961      0.003    352.755      0.000
+    PSUPP_R            0.947      0.004    233.227      0.000
+    MCARE_R            0.986      0.001   1137.664      0.000
+    CHEALTH_R          0.970      0.002    482.302      0.000
+
+
+STD Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    CARE_CHG           0.999      0.000    999.000    999.000
+    CUR_FIN            1.024      0.000    999.000    999.000
+    FUT_FIN            0.990      0.000    999.000    999.000
+
+ F2       BY
+    BIRTH_R            0.537      0.000    999.000    999.000
+    PSUPP_R            0.510      0.000    999.000    999.000
+    MCARE_R            0.463      0.000    999.000    999.000
+    CHEALTH_R          0.554      0.000    999.000    999.000
+    SELF_R             0.624      0.000    999.000    999.000
+    FAM_R              0.638      0.000    999.000    999.000
+    S_DIS_R            0.474      0.000    999.000    999.000
+    ACCES_R            0.562      0.000    999.000    999.000
+    IMPACT_R           0.485      0.000    999.000    999.000
+    IMPACT_V          -0.462      0.000    999.000    999.000
+
+ F1       WITH
+    F2                 0.409      0.000    999.000    999.000
+
+ Intercepts
+    SELF_R             1.865      0.074     25.237      0.000
+    FAM_R              3.306      0.075     44.212      0.000
+    S_DIS_R            2.763      0.072     38.330      0.000
+    ACCES_R            1.466      0.026     56.811      0.000
+    IMPACT_R           4.142      0.045     92.054      0.000
+    IMPACT_V          -1.742      0.039    -45.209      0.000
+    CARE_CHG           0.650      0.025     25.880      0.000
+    CUR_FIN            1.362      0.025     55.167      0.000
+    FUT_FIN            1.177      0.036     32.915      0.000
+    BIRTH_R            3.819      0.119     32.136      0.000
+    PSUPP_R            4.888      0.090     54.325      0.000
+    MCARE_R            2.667      0.193     13.854      0.000
+    CHEALTH_R          3.642      0.144     25.322      0.000
+
+ Variances
+    F1                 1.000      0.000    999.000    999.000
+    F2                 1.000      0.000    999.000    999.000
+
+ Residual Variances
+    SELF_R             3.232      0.136     23.737      0.000
+    FAM_R              3.185      0.129     24.689      0.000
+    S_DIS_R            3.147      0.113     27.942      0.000
+    ACCES_R            0.229      0.020     11.647      0.000
+    IMPACT_R           1.043      0.056     18.502      0.000
+    IMPACT_V           0.807      0.070     11.581      0.000
+    BIRTH_R            7.135      0.521     13.703      0.000
+    PSUPP_R            4.607      0.370     12.463      0.000
+    MCARE_R           15.535      1.003     15.485      0.000
+    CHEALTH_R          9.969      0.692     14.405      0.000
+
+
+R-SQUARE
+
+    Observed                                        Two-Tailed
+    Variable        Estimate       S.E.  Est./S.E.    P-Value
+
+    BIRTH_R            0.039      0.003     14.257      0.000
+    PSUPP_R            0.053      0.004     13.167      0.000
+    MCARE_R            0.014      0.001     15.698      0.000
+    CHEALTH_           0.030      0.002     14.848      0.000
+    SELF_R             0.108      0.004     26.596      0.000
+    FAM_R              0.113      0.004     27.845      0.000
+    S_DIS_R            0.067      0.002     29.937      0.000
+    ACCES_R            0.580      0.021     27.734      0.000
+    IMPACT_R           0.184      0.008     22.674      0.000
+    IMPACT_V           0.209      0.014     14.645      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.131E-02
+       (ratio of smallest to largest eigenvalue)
+
+
+RESIDUAL OUTPUT
+
+
+     ESTIMATED MODEL AND RESIDUALS (OBSERVED - ESTIMATED)
+
+
+           Model Estimated Inflation Probability
+              CARE_CHG      CUR_FIN#      FUT_FIN#      BIRTH_R#      PSUPP_R#
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.000         0.000
+
+
+           Model Estimated Inflation Probability
+              MCARE_R#      CHEALTH_
+              ________      ________
+                0.000         0.000
+
+
+           Model Estimated Means
+              CARE_CHG      CUR_FIN       FUT_FIN       BIRTH_R       PSUPP_R
+              ________      ________      ________      ________      ________
+                3.155         6.597         5.299         3.918         4.898
+
+
+           Model Estimated Means
+              MCARE_R       CHEALTH_      SELF_R        FAM_R         S_DIS_R
+              ________      ________      ________      ________      ________
+                3.261         3.847         1.865         3.306         2.763
+
+
+           Model Estimated Means
+              ACCES_R       IMPACT_R      IMPACT_V
+              ________      ________      ________
+                1.466         4.142        -1.742
+
+
+           Residuals for Means
+              CARE_CHG      CUR_FIN       FUT_FIN       BIRTH_R       PSUPP_R
+              ________      ________      ________      ________      ________
+               -0.862        -1.883        -1.426         0.144         0.058
+
+
+           Residuals for Means
+              MCARE_R       CHEALTH_      SELF_R        FAM_R         S_DIS_R
+              ________      ________      ________      ________      ________
+                0.255         0.192         0.000         0.000         0.000
+
+
+           Residuals for Means
+              ACCES_R       IMPACT_R      IMPACT_V
+              ________      ________      ________
+                0.002         0.000         0.000
+
+
+           Model Estimated Covariances
+              CARE_CHG      CUR_FIN       FUT_FIN       BIRTH_R       PSUPP_R
+              ________      ________      ________      ________      ________
+ CARE_CHG      20.178
+ CUR_FIN      999.000        87.133
+ FUT_FIN      999.000       999.000        51.977
+ BIRTH_R      999.000       999.000       999.000         6.436
+ PSUPP_R      999.000       999.000       999.000       999.000         4.752
+ MCARE_R      999.000       999.000       999.000       999.000       999.000
+ CHEALTH_     999.000       999.000       999.000       999.000       999.000
+ SELF_R       999.000       999.000       999.000       999.000       999.000
+ FAM_R        999.000       999.000       999.000       999.000       999.000
+ S_DIS_R      999.000       999.000       999.000       999.000       999.000
+ ACCES_R      999.000       999.000       999.000       999.000       999.000
+ IMPACT_R     999.000       999.000       999.000       999.000       999.000
+ IMPACT_V     999.000       999.000       999.000       999.000       999.000
+
+
+           Model Estimated Covariances
+              MCARE_R       CHEALTH_      SELF_R        FAM_R         S_DIS_R
+              ________      ________      ________      ________      ________
+ MCARE_R        9.861
+ CHEALTH_     999.000         8.174
+ SELF_R       999.000       999.000         3.622
+ FAM_R        999.000       999.000         0.398         3.592
+ S_DIS_R      999.000       999.000         0.296         0.302         3.372
+ ACCES_R      999.000       999.000         0.351         0.359         0.266
+ IMPACT_R     999.000       999.000         0.303         0.309         0.230
+ IMPACT_V     999.000       999.000        -0.288        -0.295        -0.219
+
+
+           Model Estimated Covariances
+              ACCES_R       IMPACT_R      IMPACT_V
+              ________      ________      ________
+ ACCES_R        0.545
+ IMPACT_R       0.273         1.278
+ IMPACT_V      -0.260        -0.224         1.020
+
+
+           Residuals for Covariances
+              CARE_CHG      CUR_FIN       FUT_FIN       BIRTH_R       PSUPP_R
+              ________      ________      ________      ________      ________
+ CARE_CHG     -18.236
+ CUR_FIN      999.000       -78.865
+ FUT_FIN      999.000       999.000       -38.401
+ BIRTH_R      999.000       999.000       999.000        -0.693
+ PSUPP_R      999.000       999.000       999.000       999.000        -0.174
+ MCARE_R      999.000       999.000       999.000       999.000       999.000
+ CHEALTH_     999.000       999.000       999.000       999.000       999.000
+ SELF_R       999.000       999.000       999.000       999.000       999.000
+ FAM_R        999.000       999.000       999.000       999.000       999.000
+ S_DIS_R      999.000       999.000       999.000       999.000       999.000
+ ACCES_R      999.000       999.000       999.000       999.000       999.000
+ IMPACT_R     999.000       999.000       999.000       999.000       999.000
+ IMPACT_V     999.000       999.000       999.000       999.000       999.000
+
+
+           Residuals for Covariances
+              MCARE_R       CHEALTH_      SELF_R        FAM_R         S_DIS_R
+              ________      ________      ________      ________      ________
+ MCARE_R       -1.741
+ CHEALTH_     999.000        -1.133
+ SELF_R       999.000       999.000         0.338
+ FAM_R        999.000       999.000         2.191         0.463
+ S_DIS_R      999.000       999.000         0.562         0.716         0.395
+ ACCES_R      999.000       999.000         0.027         0.105         0.189
+ IMPACT_R     999.000       999.000         0.300         0.302         0.636
+ IMPACT_V     999.000       999.000        -0.084        -0.176        -0.465
+
+
+           Residuals for Covariances
+              ACCES_R       IMPACT_R      IMPACT_V
+              ________      ________      ________
+ ACCES_R       -0.064
+ IMPACT_R       0.053         0.190
+ IMPACT_V       0.055        -0.366         0.057
+
+
+     UNIVARIATE DISTRIBUTION FIT
+
+     Variable          Observed      Estimated      Residual (Obs.-Est.)    Stand. Residual
+     CARE_CHG
+       Category 0        0.113          0.225                 -0.112               -7.235
+       Category 1        0.194          0.215                 -0.020               -1.314
+       Category 2        0.251          0.157                  0.094                6.921
+       Category 3        0.223          0.109                  0.114                9.870
+       Category 4        0.172          0.075                  0.097                9.883
+       Category 5        0.037          0.053                 -0.016               -1.885
+       Category 6        0.008          0.038                 -0.030               -4.170
+     CUR_FIN
+       Category 0        0.030          0.104                 -0.074               -6.499
+       Category 1        0.068          0.133                 -0.065               -5.178
+       Category 2        0.164          0.124                  0.040                3.256
+       Category 3        0.095          0.105                 -0.010               -0.898
+       Category 4        0.178          0.086                  0.091                8.767
+       Category 5        0.117          0.070                  0.047                4.961
+       Category 6        0.114          0.057                  0.058                6.679
+       Category 7        0.066          0.046                  0.020                2.523
+       Category 8        0.074          0.038                  0.036                5.104
+       Category 9        0.032          0.032                  0.000                0.026
+       Category 10       0.028          0.026                  0.001                0.219
+       Category 11       0.010          0.022                 -0.012               -2.273
+       Category 12       0.010          0.019                 -0.009               -1.786
+       Category 13       0.004          0.016                 -0.012               -2.522
+       Category 14       0.003          0.014                 -0.011               -2.510
+       Category 15       0.004          0.012                 -0.007               -1.882
+       Category 16       0.000          0.010                 -0.010               -2.713
+       Category 17       0.000          0.009                 -0.009               -2.527
+       Category 18       0.001          0.008                 -0.006               -1.931
+       Category 19       0.001          0.007                 -0.005               -1.750
+     FUT_FIN
+       Category 0        0.201          0.126                  0.075                6.066
+       Category 1        0.087          0.155                 -0.068               -5.037
+       Category 2        0.171          0.138                  0.033                2.563
+       Category 3        0.090          0.112                 -0.023               -1.936
+       Category 4        0.117          0.089                  0.029                2.718
+       Category 5        0.050          0.069                 -0.020               -2.085
+       Category 6        0.091          0.054                  0.037                4.347
+       Category 7        0.040          0.043                 -0.003               -0.401
+       Category 8        0.046          0.034                  0.011                1.657
+       Category 9        0.023          0.028                 -0.004               -0.685
+       Category 10       0.018          0.022                 -0.004               -0.817
+       Category 11       0.015          0.018                 -0.003               -0.641
+       Category 12       0.018          0.015                  0.003                0.609
+       Category 13       0.012          0.013                  0.000               -0.049
+       Category 14       0.010          0.011                 -0.001               -0.241
+       Category 15       0.001          0.009                 -0.008               -2.159
+       Category 16       0.003          0.008                 -0.005               -1.494
+       Category 17       0.001          0.006                 -0.005               -1.706
+       Category 18       0.000          0.006                 -0.006               -2.009
+       Category 19       0.003          0.005                 -0.002               -0.787
+       Category 20       0.001          0.004                 -0.003               -1.156
+       Category> 20      0.001          0.035                 -0.033               -4.900
+
+
+SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES
+
+
+     SAMPLE STATISTICS
+
+
+           Means
+              F1            F1_SE         F2            F2_SE
+              ________      ________      ________      ________
+                0.000         0.317         0.000         0.535
+
+
+           Covariances
+              F1            F1_SE         F2            F2_SE
+              ________      ________      ________      ________
+ F1             0.298
+ F1_SE         -0.042         0.006
+ F2             0.239        -0.034         0.836
+ F2_SE         -0.001         0.000        -0.001         0.000
+
+
+           Correlations
+              F1            F1_SE         F2            F2_SE
+              ________      ________      ________      ________
+ F1             1.000
+ F1_SE         -0.995         1.000
+ F2             0.480        -0.482         1.000
+ F2_SE         -0.207         0.215        -0.163         1.000
+
+
+SAVEDATA INFORMATION
+
+
+  Save file
+    cfa_pre_2_fscores.txt
+
+  Order and format of variables
+
+    CARE_CHG       F10.3
+    CUR_FIN        F10.3
+    FUT_FIN        F10.3
+    BIRTH_R        F10.3
+    PSUPP_R        F10.3
+    MCARE_R        F10.3
+    CHEALTH_       F10.3
+    SELF_R         F10.3
+    FAM_R          F10.3
+    S_DIS_R        F10.3
+    ACCES_R        F10.3
+    IMPACT_R       F10.3
+    IMPACT_V       F10.3
+    F1             F10.3
+    F1_SE          F10.3
+    F2             F10.3
+    F2_SE          F10.3
+
+  Save file format
+    17F10.3
+
+  Save file record length    10000
+
+
+     Beginning Time:  09:57:49
+        Ending Time:  09:58:11
+       Elapsed Time:  00:00:22
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2019 Muthen & Muthen

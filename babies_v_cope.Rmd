@@ -1,0 +1,1001 @@
+---
+title: "Analyses for Aim 1 of \"Pregnancy during the pandemic: The impact of COVID-19-related stress on risk for prenatal depression\""
+
+author: "Lucy S. King"
+date: "2020"
+output: 
+  github_document:
+    toc: true
+    toc_depth: 2
+---
+
+# Set up environment
+```{r}
+# Libraries
+library(tidyverse)
+library(lubridate)
+library(parameters)
+library(ggsci)
+library(ggpubr)
+library(relaimpo)
+library(effectsize)
+library(MatchIt)
+library(cem)
+library(codebook)
+library(labelled)
+source("R_rainclouds.R")
+
+# Data files
+
+## BABIES
+babies_data_home <- "~/Box/Mooddata_Coordinating/BABIES/Data/final_scored_data/"
+babes_demo_file <- paste0(babies_data_home, "demographics/demo_longitudinal_cleaned_final.csv")
+babies_epds_file <- paste0(babies_data_home, "EPDS/epds_wf_complete.csv")
+babies_prams_file <- paste0(babies_data_home, "PRAMS/prams_alldata_cleaned.csv")
+babies_treatment_file <- paste0(babies_data_home, "SCID/scid_lg_preg_treatment_history_complete.csv")
+
+# ## COPE
+cope_data <- "~/Box/Mooddata_Coordinating/COPE/data/wrangled_cleaned_data_PREG_20201118.csv"
+
+set.seed(100588)
+
+```
+
+# Read in data
+
+## BABIES data
+```{r}
+babies <-
+  read_csv(babes_demo_file) %>% 
+  left_join(
+    read_csv(babies_treatment_file), by = "ID"
+  ) %>% 
+  dplyr::select(
+    ID,
+    mom_age_t1,
+    education = education_t1_txt,
+    income_bins = annual_income_t1_txt,
+    income_numeric = annual_income_t1_num,
+    income_needs_t1, 
+    employment_status_t1_txt,
+    employment_explain_t1,
+    pregnant_times_t1,
+    pregnant_times_t2,
+    pregnant_times_t3,
+    current_num_child_t1 = current_num_children_t1,
+    gestational_weeks_t1,
+    ppl_in_home_adults_t1,
+    ppl_in_home_allchild_t1,
+    ppl_in_home_tot_t1,
+    mom_race,
+    mom_latinx,
+    marital_status_t1_txt,
+    past_mh_sa_treatment
+  ) %>% 
+  mutate(
+    pregnant_times = if_else(
+      is.na(pregnant_times_t1), pregnant_times_t2, pregnant_times_t1
+    ),
+    pregnant_times = if_else(
+      is.na(pregnant_times), pregnant_times_t3, pregnant_times
+    )
+  ) %>% 
+  dplyr::select(
+    -pregnant_times_t1:-pregnant_times_t3
+  ) %>% 
+  rename_at(
+    vars(-ID),
+    funs(str_replace(., "_t1", ""))
+  ) %>% 
+  left_join(
+    read_csv(babies_epds_file) %>% 
+      dplyr::select(-epds_t3, -epds_t3_concern),
+    by = "ID"
+  ) %>% 
+  mutate(cohort = "Pre-pandemic") %>% 
+  dplyr::select(
+    ID,
+    cohort,
+    epds_total = epds_t1,
+    everything()
+  ) %>% 
+  mutate(
+    job_status = case_when(
+      employment_status_txt == "Out of work, looking for work" ~ "Unemployed",
+      employment_status_txt == "Out of work, not looking for work" ~ "Unemployed",
+      TRUE ~ employment_status_txt
+    ),
+    ID = paste0(ID, "_b"),
+    first_pregnancy = if_else(
+      !is.na(pregnant_times) & pregnant_times == 1, 1, 0
+    ),
+    current_num_child = if_else(
+      is.na(current_num_child), ppl_in_home_allchild, current_num_child
+    )
+  ) %>% 
+  #1078 did not actually participate in pregnancy; need to remove from BABIES pregnancy demographics
+  filter(!is.na(epds_total))
+```
+
+```{r}
+babies <-
+  babies %>% 
+  group_by(ID) %>% 
+   # inr based on the federal poverty thresholds for number of people in household and number that are children
+  mutate(
+    fpl_threshold = case_when(
+      ppl_in_home_tot == 1 & ppl_in_home_allchild == 0 ~ 13300,
+      ppl_in_home_tot == 2 & ppl_in_home_allchild == 0 ~ 17120,
+      ppl_in_home_tot == 2 & ppl_in_home_allchild == 1 ~ 17622,
+      ppl_in_home_tot == 3 & ppl_in_home_allchild == 0 ~ 19998,
+      ppl_in_home_tot == 3 & ppl_in_home_allchild == 1 ~ 20578,
+      ppl_in_home_tot == 3 & ppl_in_home_allchild == 2 ~ 20598,
+      ppl_in_home_tot == 4 & ppl_in_home_allchild == 0 ~ 26370,
+      ppl_in_home_tot == 4 & ppl_in_home_allchild == 1 ~ 26801,
+      ppl_in_home_tot == 4 & ppl_in_home_allchild == 2 ~ 25926,
+      ppl_in_home_tot == 4 & ppl_in_home_allchild == 3 ~ 26017,
+      ppl_in_home_tot == 5 & ppl_in_home_allchild == 0 ~ 31800,
+      ppl_in_home_tot == 5 & ppl_in_home_allchild == 1 ~ 32263,
+      ppl_in_home_tot == 5 & ppl_in_home_allchild == 2 ~ 31275,
+      ppl_in_home_tot == 5 & ppl_in_home_allchild == 3 ~ 30510,
+      ppl_in_home_tot == 5 & ppl_in_home_allchild == 4 ~ 30044,
+      ppl_in_home_tot == 6 & ppl_in_home_allchild == 0 ~ 36576,
+      ppl_in_home_tot == 6 & ppl_in_home_allchild == 1 ~ 36721,
+      ppl_in_home_tot == 6 & ppl_in_home_allchild == 2 ~ 35965,
+      ppl_in_home_tot == 6 & ppl_in_home_allchild == 3 ~ 35239,
+      ppl_in_home_tot == 6 & ppl_in_home_allchild == 4 ~ 34161,
+      ppl_in_home_tot == 6 & ppl_in_home_allchild == 5 ~ 33522,
+      ppl_in_home_tot == 7 & ppl_in_home_allchild == 0 ~ 42085,
+      ppl_in_home_tot == 7 & ppl_in_home_allchild == 1 ~ 42348,
+      ppl_in_home_tot == 7 & ppl_in_home_allchild == 2 ~ 41442,
+      ppl_in_home_tot == 7 & ppl_in_home_allchild == 3 ~ 40811,
+      ppl_in_home_tot == 7 & ppl_in_home_allchild == 4 ~ 39635,
+      ppl_in_home_tot == 7 & ppl_in_home_allchild == 5 ~ 38262,
+      ppl_in_home_tot == 7 & ppl_in_home_allchild == 6 ~ 36757,
+      ppl_in_home_tot == 8 & ppl_in_home_allchild == 0 ~ 47069,
+      ppl_in_home_tot == 8 & ppl_in_home_allchild == 1 ~ 47485,
+      ppl_in_home_tot == 8 & ppl_in_home_allchild == 2 ~ 46630,
+      ppl_in_home_tot == 8 & ppl_in_home_allchild == 3 ~ 45881,
+      ppl_in_home_tot == 8 & ppl_in_home_allchild == 4 ~ 44818,
+      ppl_in_home_tot == 8 & ppl_in_home_allchild == 5 ~ 43470,
+      ppl_in_home_tot == 8 & ppl_in_home_allchild == 6 ~ 42066,
+      ppl_in_home_tot == 8 & ppl_in_home_allchild == 7 ~ 41709,
+      ppl_in_home_tot >= 9 & ppl_in_home_allchild == 0 ~ 56621,
+      ppl_in_home_tot >= 9 & ppl_in_home_allchild == 1 ~ 56895,
+      ppl_in_home_tot >= 9 & ppl_in_home_allchild == 2 ~ 56139,
+      ppl_in_home_tot >= 9 & ppl_in_home_allchild == 3 ~ 55503,
+      ppl_in_home_tot >= 9 & ppl_in_home_allchild == 4 ~ 54460,
+      ppl_in_home_tot >= 9 & ppl_in_home_allchild == 5 ~ 53025,
+      ppl_in_home_tot >= 9 & ppl_in_home_allchild == 6 ~ 51727,
+      ppl_in_home_tot >= 9 & ppl_in_home_allchild == 7 ~ 51406,
+      ppl_in_home_tot >= 9 & ppl_in_home_allchild >= 8 ~ 49426
+    ),
+    inr_fpl = income_numeric / fpl_threshold
+  ) %>% 
+  ungroup()
+```
+
+## COPE data
+```{r}
+cope <-
+  read_csv(cope_data) %>% 
+  rename(current_num_child = current_num_bio_children, ID = cope_id) %>% 
+  mutate(
+    cohort = "COVID-19",
+    past_mh_sa_treatment = dplyr::recode(
+      past_mh_sa_treatment,
+      "past treatment" = 1,
+      "none" = 0
+    )
+  ) 
+```
+
+## Join BABIES and COPE
+```{r}
+d <-
+  babies %>% 
+  bind_rows(
+    cope %>% 
+      mutate(ID = as.character(ID))
+  ) %>% 
+  mutate(cohort = as.factor(cohort)) %>% 
+  ungroup()
+```
+
+# Cleaning to enable comparisons
+
+```{r}
+# create variable for "White" and "Person of color"
+d <-
+  d %>% 
+  mutate(
+    poc = case_when(
+      race_c == "White" ~ 0,
+      mom_race == "White" ~ 0,
+      !is.na(mom_race) & mom_race != "White" ~ 1,
+      !is.na(race_c) & race_c != "White" ~ 1,
+      mom_latinx == 1 ~ 1
+    )
+  ) 
+```
+
+```{r}
+# recode job_status variable so BABIES and COPE bins are equivalent
+d  <-
+  d %>% 
+  mutate(
+    job_status = case_when(
+      job_status == "Employed for wages" ~ "Employed",
+      job_status == "fulltime paid job" ~ "Employed",
+      job_status == "parttime paid job" ~ "Employed",
+      job_status == "Self-employed" ~ "Employed",
+      job_status == "Homemaker" ~ "Home caregiver",
+      job_status == "home caregiver" ~ "Home caregiver",
+      job_status == "Student" ~ "Student",
+      job_status == "student" ~ "Student",
+      job_status == "retired" ~ "Other",
+      job_status == "other" ~ "Other",
+      job_status == "Unable to work" ~ "Other",
+      job_status == "Unemployed" ~ "Unemployed",
+      job_status == "unemployed/looking" ~ "Unemployed"
+    ),
+    employed = if_else(
+      !is.na(job_status) & job_status == "Employed", 1, 0
+    )
+  ) 
+```
+
+```{r}
+# recode education variables so BABIES and COPE bins are equivalent
+d <-
+  d %>% 
+  mutate(
+    education = case_when(
+      education == "7th-9th grade" ~ "< High school diploma",
+      education == "10th-12th grade" ~ "< High school diploma",
+      education == "Some high school, no diploma" ~ "< High school diploma",
+      education == "High school/GED" ~ "High school/GED",
+      education == "Partial college" ~ "Partial college, no degree",
+      education == "Some college credit, no degree" ~ "Partial college, no degree",
+      education == "Trade school/apprenticeship" ~ "Trade/technical/vocational training",
+      education == "Trade/technical/vocational training" ~ "Trade/technical/vocational training",
+      education == "2-year college degree" ~ "Associate degree",
+      education == "Associate degree" ~ "Associate degree",
+      education == "4-year college degree" ~ "Bachelor's degree",
+      education == "Bachelor's degree" ~ "Bachelor's degree",
+      education == "Graduate degree" ~ "Graduate degree",
+    ),
+    college_or_higher = if_else(
+      !is.na(education) & education == "Bachelor's degree" | education == "Graduate degree",
+      1, 0
+    )
+  ) 
+```
+
+```{r}
+# create variable for partnered/married vs. not
+d <-
+  d %>% 
+  mutate(
+    partnered = case_when(
+      marital_status_txt == "Married/domestic partnership" ~ 1,
+      marriage_status == "Partner/married" ~ 1,
+      TRUE ~ 0
+    )
+  ) 
+
+```
+
+
+```{r}
+d <-
+  d %>% 
+  mutate(
+    low_income = if_else(
+      income_numeric <= 2 * fpl_threshold, 1, 0
+    )
+  )
+```
+
+# BABIES sample characteristics
+```{r}
+d %>% 
+  filter(cohort == "Pre-pandemic") %>% 
+  summarise_at(
+    vars(
+      mom_age,
+      gestational_weeks,
+      ppl_in_home_allchild,
+      ppl_in_home_adults,
+      inr_fpl,
+      epds_total
+    ),
+    funs(mean, sd, min, max), na.rm = TRUE
+  ) 
+```
+
+```{r}
+d %>% 
+  filter(cohort == "Pre-pandemic") %>% 
+  count(first_pregnancy) %>% 
+  mutate(per = n / sum(n))
+```
+
+```{r}
+d %>% 
+  filter(cohort == "Pre-pandemic") %>% 
+  count(mom_race, mom_latinx) %>% 
+  mutate(per = n / sum(n)) %>% 
+  arrange(desc(n))
+
+d %>% 
+  filter(cohort == "Pre-pandemic") %>% 
+  count(poc) %>% 
+  mutate(per = n / sum(n)) %>% 
+  arrange(desc(n))
+```
+
+```{r}
+d %>% 
+  filter(cohort == "Pre-pandemic") %>% 
+  count(income_numeric > 100000) %>% 
+  mutate(per = n / sum(n)) 
+
+d %>% 
+  filter(cohort == "Pre-pandemic") %>% 
+  count(low_income) %>% 
+  mutate(per = n / sum(n)) 
+```
+
+```{r}
+d %>% 
+  filter(cohort == "Pre-pandemic") %>% 
+  count(education) %>% 
+  mutate(per = n / sum(n)) %>% 
+  arrange(desc(n))
+
+d %>% 
+  filter(cohort == "Pre-pandemic") %>%  
+  count(college_or_higher) %>% 
+  mutate(per = n / sum(n)) %>% 
+  arrange(desc(n))
+```
+
+```{r}
+d %>% 
+  filter(cohort == "Pre-pandemic") %>% 
+  count(job_status) %>% 
+  mutate(per = n / sum(n)) %>% 
+  arrange(desc(n))
+```
+
+```{r}
+d %>% 
+  filter(cohort == "Pre-pandemic") %>% 
+  count(partnered) %>% 
+  mutate(per = n / sum(n)) %>% 
+  arrange(desc(n))
+```
+
+```{r}
+d %>% 
+  filter(cohort == "Pre-pandemic") %>% 
+  count(past_mh_sa_treatment) %>% 
+  mutate(per = n / sum(n))
+```
+
+# Distributions 
+```{r}
+d %>% 
+  dplyr::select(
+    cohort,
+    `Age (years)` = mom_age,
+    `Number of children` = ppl_in_home_allchild,
+    `Gestational weeks` = gestational_weeks
+  ) %>% 
+  gather(
+    key, 
+    value,
+    -cohort
+  ) %>% 
+  ggplot(aes(value, fill = fct_rev(cohort))) +
+  geom_density(alpha = 1/2) +
+  scale_fill_nejm() +
+  theme_pubr() +
+  theme(
+    strip.text = element_text(size = 16),
+    axis.title.y = element_text(size = 20),
+    axis.title.x = element_text(size = 20),
+    axis.text.y = element_text(size = 16),
+    axis.text.x = element_text(size = 16),
+    legend.title = element_text(size = 18),
+    legend.text = element_text(size = 16),
+    legend.position = "bottom"
+  ) +
+  labs(
+    x = NULL,
+    fill = "Cohort"
+  ) +
+  facet_wrap(.~key, scales = "free")
+
+
+ggsave(
+  "~/Box/lucy_king_files/BABIES/cope/figures/babies_cope_density_plots.png",
+  dpi = 600,
+  width = 10,
+  height = 4
+)
+```
+
+```{r}
+counts_table <-
+  d %>% 
+  dplyr::select(
+    ID,
+    cohort,
+    first_pregnancy,
+    partnered,
+    poc,
+    low_income,
+    college_or_higher,
+    employed,
+    past_mh_sa_treatment,
+  ) %>% 
+  gather(variable, value, -cohort, -ID) %>% 
+  group_by(cohort, variable) %>% 
+  mutate(
+    sample_size = sum(!is.na(value))
+  ) %>% 
+  group_by(cohort, variable) %>% 
+  summarise(
+    sample_size = mean(sample_size),
+    n = sum(value, na.rm = TRUE),
+  ) %>% 
+  mutate(
+    Percent = n / sample_size,
+    variable = recode_factor(
+      variable,
+      "college_or_higher" = "College or higher",
+      "employed" = "Employed",
+      "first_pregnancy" = "Primiparous",
+      "low_income" = "Low income",
+      "partnered" = "Married or partnered",
+      "poc" = "Person of color",
+      "past_mh_sa_treatment" = "Past mental health/substance treatment"
+    )
+  ) %>% 
+  dplyr::select(-sample_size) %>% 
+  ungroup()
+```
+
+
+# Test initial differences
+```{r}
+chisq.test(d$employed, d$cohort)
+chisq.test(d$college_or_higher, d$cohort)
+chisq.test(d$low_income, d$cohort) 
+chisq.test(d$poc, d$cohort) 
+chisq.test(d$past_mh_sa_treatment, d$cohort) 
+
+
+chisq.test(d$first_pregnancy, d$cohort) # significant
+chisq.test(d$partnered, d$cohort) # significant
+d %>% 
+  count(cohort, partnered) %>% 
+  group_by(cohort) %>% 
+  mutate(per = n / sum(n))
+
+
+t.test(d$ppl_in_home_allchild ~ d$cohort)
+t.test(d$mom_age ~ d$cohort) # significant
+t.test(d$gestational_weeks ~ d$cohort) # significant
+```
+
+# Match samples
+
+see: https://data.library.virginia.edu/getting-started-with-matching-methods/
+
+```{r}
+#first, only include COPE women in bay area counties
+d %>% 
+  count(ca_county)
+
+d.1 <-
+  d %>% 
+  filter(
+    !ca_county %in% c(
+      "Monterey", 
+      "Fresno", 
+      "Orange", 
+      "Humboldt", 
+      "Sacramento", 
+      "San Diego", 
+      "Yolo"
+    )
+  ) %>% 
+  mutate(
+    exclude = if_else(cohort == "COVID-19" & is.na(ca_county), 1, 0)
+  ) %>% 
+  filter(exclude == 0)
+```
+
+## Optimal Nearest Neighbor
+
+```{r}
+# define what we want to match on; missing values on covariates not allowed
+
+# missing values not allowed
+d.2 <-
+  d.1 %>% 
+  filter(
+    !is.na(ppl_in_home_allchild),
+    !is.na(mom_age),
+    !is.na(low_income),
+    !is.na(college_or_higher),
+    !is.na(past_mh_sa_treatment)
+  )
+
+
+# including education led to poorer match; therefore, not included
+m.out <- matchit(
+  cohort ~
+    mom_age +
+    gestational_weeks +
+    ppl_in_home_allchild +
+    first_pregnancy +
+    partnered +
+    employed +
+    past_mh_sa_treatment,
+  data = d.2,
+  method = "optimal"
+)
+```
+
+```{r}
+# results of matching procedure
+s.out <- summary(m.out, standardize = TRUE)
+s.out
+plot(
+  s.out, 
+  xlim = c(0, .8)
+)
+```
+
+```{r}
+# save matched data
+d_matched <- match.data(m.out) 
+```
+
+## Coarsened exact matching
+
+```{r}
+m.out_cem <- matchit(
+  cohort ~
+    mom_age +
+    gestational_weeks +
+    ppl_in_home_allchild +
+    first_pregnancy +
+    partnered +
+    employed +
+    past_mh_sa_treatment,
+  data = d.2,
+  method = "cem"
+)
+```
+
+```{r}
+# results of matching procedure
+s.out_cem <- summary(m.out_cem, standardize = TRUE)
+s.out_cem
+
+plot(
+  s.out_cem, 
+  xlim = c(0, .8)
+)
+
+```
+
+```{r}
+# save matched data
+d_matched_cem <- match.data(m.out_cem) 
+d_matched_cem %>% 
+  count(cohort)
+```
+## Distributions of matched data 
+```{r}
+d_matched %>% 
+  dplyr::select(
+    cohort,
+    `Age (years)` = mom_age,
+    `Number of children` = ppl_in_home_allchild,
+    `Gestational weeks` = gestational_weeks
+  ) %>% 
+  gather(
+    key, 
+    value,
+    -cohort
+  ) %>% 
+  ggplot(aes(value, fill = fct_rev(cohort))) +
+  geom_density(alpha = 1/2) +
+  scale_fill_nejm() +
+  theme_pubr() +
+  theme(
+    strip.text = element_text(size = 16),
+    axis.title.y = element_text(size = 20),
+    axis.title.x = element_text(size = 20),
+    axis.text.y = element_text(size = 16),
+    axis.text.x = element_text(size = 16),
+    legend.title = element_text(size = 18),
+    legend.text = element_text(size = 16),
+    legend.position = "bottom"
+  ) +
+  labs(
+    x = NULL,
+    fill = "Cohort"
+  ) +
+  facet_wrap(.~key, scales = "free")
+
+
+ggsave(
+  "~/Box/lucy_king_files/BABIES/cope/figures/babies_cope_density_plots_matched.png",
+  dpi = 600,
+  width = 10,
+  height = 4
+)
+```
+
+```{r}
+counts_table_matched <-
+  d_matched %>% 
+  dplyr::select(
+    ID,
+    cohort,
+    first_pregnancy,
+    partnered,
+    poc,
+    low_income,
+    college_or_higher,
+    employed,
+    past_mh_sa_treatment,
+  ) %>% 
+  gather(variable, value, -cohort, -ID) %>% 
+  group_by(cohort, variable) %>% 
+  mutate(
+    sample_size = sum(!is.na(value))
+  ) %>% 
+  group_by(cohort, variable) %>% 
+  summarise(
+    sample_size = mean(sample_size),
+    n = sum(value, na.rm = TRUE),
+  ) %>% 
+  mutate(
+    Percent = n / sample_size,
+    variable = recode_factor(
+      variable,
+      "college_or_higher" = "College or higher",
+      "employed" = "Employed",
+      "first_pregnancy" = "Primiparous",
+      "low_income" = "Low income",
+      "partnered" = "Married or partnered",
+      "poc" = "Person of color",
+      "past_mh_sa_treatment" = "Past mental health/substance treatment"
+    )
+  ) %>% 
+  dplyr::select(-sample_size) %>% 
+  ungroup()
+
+counts_table_matched
+```
+## Means, SDs, ranges of matched data
+```{r}
+d_matched %>% 
+  group_by(cohort) %>% 
+  summarise_at(
+    vars(
+      ppl_in_home_allchild,
+      mom_age,
+      gestational_weeks
+    ),
+    funs(mean, sd, min, max), na.rm = TRUE
+  )
+```
+
+## Test differences after matching
+```{r}
+chisq.test(d_matched$employed, d_matched$cohort)
+chisq.test(d_matched$college_or_higher, d_matched$cohort)
+chisq.test(d_matched$low_income, d_matched$cohort) 
+chisq.test(d_matched$poc, d_matched$cohort) 
+chisq.test(d_matched$past_mh_sa_treatment, d_matched$cohort) 
+chisq.test(d_matched$first_pregnancy, d_matched$cohort) 
+chisq.test(d_matched$partnered, d_matched$cohort) 
+
+t.test(d_matched$ppl_in_home_allchild ~ d_matched$cohort)
+t.test(d_matched$mom_age ~ d_matched$cohort) 
+t.test(d_matched$gestational_weeks ~ d_matched$cohort) 
+```
+
+# Test Aim 1
+
+H1: The COPE sample of pregnant mothers will have higher mean EPDS than the BABIES/pre-COVID pregnant mothers.
+
+# Center factors
+```{r}
+d_matched <-
+  d_matched %>% 
+  mutate_at(
+    vars(college_or_higher, employed, poc, first_pregnancy, past_mh_sa_treatment, partnered, low_income),
+    as.factor
+  )
+
+contrasts(d_matched$cohort)
+
+contrasts(d_matched$low_income) <- c(-.5, .5)
+
+contrasts(d_matched$college_or_higher) <- c(-.5, .5)
+
+contrasts(d_matched$employed) <- c(-.5, .5)
+
+contrasts(d_matched$first_pregnancy) <- c(-.5, .5)
+
+contrasts(d_matched$past_mh_sa_treatment) <- c(-.5, .5)
+
+contrasts(d_matched$partnered) <- c(-.5, .5)
+```
+
+# Unadjusted t-test
+```{r}
+t.test(d_matched$epds_total ~ d_matched$cohort)
+cohens_d(d_matched$epds_total, d_matched$cohort)
+```
+
+# Adjusted OLS
+```{r}
+lm_a1.1 <- 
+  lm(
+  epds_total ~
+    cohort +
+    low_income +
+    college_or_higher +
+    employed +
+    first_pregnancy +
+    past_mh_sa_treatment +
+    partnered +
+    poc +
+    scale(mom_age, scale = FALSE) +
+    scale(gestational_weeks, scale = FALSE) +
+    scale(ppl_in_home_allchild, scale = FALSE),
+  data = d_matched
+)
+summary(lm_a1.1)
+model_parameters(lm_a1.1, standardize = "refit")
+```
+
+# Unadjusted chi-square
+```{r}
+d_matched <-
+  d_matched %>% 
+  mutate(
+    epds_above_cutoff = if_else(
+      epds_total >= 11, 1, 0
+    )
+  )
+
+chisq.test(d_matched$epds_above_cutoff, d_matched$cohort)
+
+epds_cutoff_table <- 
+  d_matched %>% 
+  count(cohort, epds_above_cutoff) %>% 
+  group_by(cohort) %>% 
+  mutate(per = n / sum(n))
+
+epds_cutoff_table
+
+# relative risk of COPE vs. BABIES
+depression_cope <- epds_cutoff_table[2, 4] %>% pull()
+depression_babies <- epds_cutoff_table[4, 4] %>% pull()
+RR <- depression_cope / depression_babies
+RR
+```
+
+## Visualize main effect
+```{r}
+d_matched %>% 
+  ggplot(aes(x = fct_rev(cohort), y = epds_total, fill = cohort)) +
+  geom_flat_violin(
+    aes(fill = cohort),
+    position = position_nudge(x = .21, y = 0), 
+    adjust = 1.5, 
+    trim = TRUE, 
+    alpha = .65, 
+    colour = NA
+  ) +
+  geom_point(
+    aes(x = as.numeric(fct_rev(cohort))-.26, y = epds_total, colour = cohort),
+    position = position_jitter(width = .05), 
+    size = 2,
+    alpha = .65,
+    shape = 20
+  ) +
+  geom_boxplot(
+    aes(x = fct_rev(cohort), y = epds_total, fill = cohort),
+    outlier.shape = NA, 
+    alpha = .65, 
+    width = .4, 
+    colour = "black"
+  ) +
+  # remove grid lines, etc.
+  theme_pubr() +
+  # adjust size and position of labels
+  theme(
+    axis.title.y = element_text(size = 20),
+    axis.title.x = element_text(size = 20),
+    axis.text.y = element_text(size = 16),
+    axis.text.x = element_text(size = 16),
+    # remove legend
+    legend.position = "none"
+  ) +
+  # change names of labels
+  labs(
+    x = "Cohort",
+    y = "Prenatal depressive symptoms\n(EPDS)"
+  ) +
+  # add color pallete
+  scale_color_nejm() +
+  scale_fill_nejm() 
+
+ggsave(
+  "~/Box/lucy_king_files/BABIES/cope/figures/babies_cope_epds.jpeg",
+  width = 6,
+  height = 5,
+  dpi = 1000
+)
+```
+# Compare participants in COVID-19 subset to participants in full cohort
+```{r}
+d_matched <-
+  d_matched %>% 
+  mutate(
+    matched_subset = if_else(
+      cohort == "COVID-19", 1, 0
+    )
+  )
+
+cope <-
+  cope %>% 
+  left_join(
+    d_matched %>% 
+      filter(cohort == "COVID-19") %>% 
+      dplyr::select(ID, matched_subset) %>% 
+      mutate(ID = as.numeric(ID)),
+    by = "ID"
+  )
+
+cope <-
+  cope %>% 
+  mutate(
+    matched_subset = as.factor(
+      if_else(is.na(matched_subset), 0, matched_subset)
+    )
+  ) 
+```
+
+```{r}
+cope %>% 
+  group_by(matched_subset) %>% 
+  summarise_at(
+    vars(epds_total),
+    funs(mean, sd), na.rm = TRUE
+  )
+
+t.test(cope$epds_total ~ cope$matched_subset)
+cohens_d(cope$epds_total, cope$matched_subset)
+```
+# EPDS ~ gestational age
+```{r}
+d %>% 
+  ggplot(aes(gestational_weeks, epds_total, color = fct_rev(cohort))) +
+  geom_point(alpha = 1/2, size = 1.5) +
+  geom_smooth(method = "lm", size = 2.5) +
+  scale_color_aaas() +
+  theme_pubr() +
+  theme(
+    strip.text = element_text(size = 18),
+    axis.title.y = element_text(size = 20),
+    axis.title.x = element_text(size = 20),
+    axis.text.y = element_text(size = 16),
+    axis.text.x = element_text(size = 16),
+    legend.text = element_text(size = 20)
+  ) +
+  labs(
+    color = NULL,
+    x = "Gestational weeks in pregnancy",
+    y = "Prenatal depressive symptoms\n(EPDS)"
+  ) 
+
+ggsave(
+  "~/Box/lucy_king_files/BABIES/cope/figures/gestation_weeks_epds_cohort.png",
+  width = 7,
+  height = 5,
+  dpi = 1000
+)
+```
+
+# Export data to share
+```{r}
+matched_COPE_IDs <-
+  cope %>% 
+  dplyr::select(ID, matched_subset)
+
+write_csv(
+  matched_COPE_IDs,
+  "~/Box/lucy_king_files/BABIES/cope/matched_COPE_IDs_n82_20201207.csv"
+)
+
+matched_IDs <-
+  d_matched %>% 
+  mutate(matched_subset = "matched_subset") %>% 
+  dplyr::select(ID, matched_subset)
+
+d_share <-
+  d %>% 
+  dplyr::select(
+    ID,
+    cohort,
+    epds_total,
+    mom_age,
+    mom_race,
+    mom_latinx,
+    job_status,
+    employed,
+    education,
+    college_or_higher,
+    income_numeric,
+    low_income,
+    inr_fpl,
+    poc,
+    past_mh_sa_treatment,
+    first_pregnancy,
+    partnered,
+    ppl_in_home_allchild,
+    ppl_in_home_adults,
+    gestational_weeks,
+    ca_county
+  ) %>% 
+  left_join(
+    matched_IDs, by = "ID"
+  )
+
+var_label(d_share) <-
+  list(
+    cohort = "Women pregnant prior to or during the COVID-19 pandemic",
+    epds_total = "Total score on Edinburgh Postnatal Depression Scale",
+    mom_age = "Participant's age at assessment",
+    mom_race = "Participant's self-reported race",
+    mom_latinx = "Did participant self-reported Hispanic/Latinx ethnicity?",
+    job_status = "Is participant employed for wages?",
+    education = "Participant's self-reported level of education",
+    college_or_higher = "Did participant complete at least a 4-year college degree?",
+    income_numeric = "Participant's self reported income (originally reported in bins; here, midpoint of bin to allow calculation of income-to-needs ratio)",
+    inr_fpl = "Income-to-needs ratio based on federal poverty line",
+    poc = "Did participant identify as a person of color?",
+    past_mh_sa_treatment = "Did participant receive treatment for mental health difficulties or substance abuse in the past?",
+    first_pregnancy = "Is this the participant's first pregnancy?",
+    partnered = "Does the participant have a partner/significant other?",
+    ppl_in_home_allchild = "Total number of children in participant's household",
+    ppl_in_home_adults = "Total number of adults in participan'ts household",
+    ca_county = "California county in which participant resides (missing for pre-pandemic participants because all were from San Francisco Bay Area counties",
+    matched_subset = "Is the COVID-19 participant part of the subset matched to the pre-prandemic participants?",
+    gestational_weeks = "Number of gestational weeks into pregnancy (calculated based on due date)"
+  )
+
+metadata(d_share)$name <- "Analysed data for Aim 1 of \"Pregnancy during the pandemic\\: The impact of COVID-19-related stress on risk for prenatal depression\" (King et al. 2020)"
+
+write_csv(
+  d_share,
+  "~/Desktop/BABIES/COPE/cope_git/analyzed_data_Aim1.csv"
+)
+
+```
+
+

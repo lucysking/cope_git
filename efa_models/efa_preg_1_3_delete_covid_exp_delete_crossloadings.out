@@ -1,0 +1,593 @@
+Mplus VERSION 8.4 (Mac)
+MUTHEN & MUTHEN
+11/19/2020   2:55 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE: COPE EFA of COVID-19 stress variables
+
+  DATA: FILE = "~/Desktop/BABIES/COPE/covid_stress_vars_preg.dat";
+
+  	
+  VARIABLE:
+
+  NAMES = 	cope_id
+  	care_chg
+  	birth_r
+  	psupp_r
+  	mcare_r
+  	chealth_r
+  	self_r
+  	fam_r
+  	cur_fin
+  	c_fin_r
+  	fut_fin
+  	f_fin_r
+  	s_dis_r
+  	restric
+  	acces_r
+  	impact_r
+  	impact_v
+  	cov_conf
+  	cov_pos;
+  	
+  USEVARIABLES =
+  	care_chg
+  	birth_r
+  	psupp_r
+  	mcare_r
+  	chealth_r
+  	self_r
+  	fam_r
+  	cur_fin
+  	fut_fin
+  	s_dis_r
+  	acces_r
+  	impact_r
+  	impact_v;
+  	
+  	
+  COUNT =
+  	care_chg
+  	cur_fin
+  	fut_fin;
+
+  CENSORED =
+  	birth_r (b) ! censored from below (floor effect)
+      	psupp_r (b)
+       	mcare_r  (b)
+       	chealth_r (b);
+  	
+  MISSING = .;
+
+  ANALYSIS:
+
+  TYPE = EFA 1 3;
+  !PARALLEL = 50; ! carry out parallel anlysis to determine number of factors; cannot comput
+
+  ESTIMATOR = MLR; !uses FIML to handle missing data
+
+  ROTATION = GEOMIN;
+
+  INTEGRATION = MONTECARLO (5000);
+
+  PROCESSORS = 2;
+
+  ALGORITHM = EM;
+
+
+
+
+
+
+*** WARNING
+  Input line exceeded 90 characters. Some input may be truncated.
+  !PARALLEL = 50; ! carry out parallel anlysis to determine number of factors; cannot compute
+*** WARNING in VARIABLE command
+  Note that only the first 8 characters of variable names are used in the output.
+  Shorten variable names to avoid any confusion.
+   2 WARNING(S) FOUND IN THE INPUT INSTRUCTIONS
+
+
+
+COPE EFA of COVID-19 stress variables
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         725
+
+Number of dependent variables                                   13
+Number of independent variables                                  0
+Number of continuous latent variables                            0
+
+Observed dependent variables
+
+  Continuous
+   SELF_R      FAM_R       S_DIS_R     ACCES_R     IMPACT_R    IMPACT_V
+
+  Censored
+   BIRTH_R     PSUPP_R     MCARE_R     CHEALTH_R
+
+  Count
+   CARE_CHG    CUR_FIN     FUT_FIN
+
+
+Estimator                                                      MLR
+Rotation                                                    GEOMIN
+Row standardization                                    CORRELATION
+Type of rotation                                           OBLIQUE
+Epsilon value                                               Varies
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-02
+    Relative loglikelihood change                        0.100D-05
+    Derivative                                           0.100D-02
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+Optimization Specifications for the Exploratory Factor Analysis
+Rotation Algorithm
+  Number of random starts                                       30
+  Maximum number of iterations                               10000
+  Derivative convergence criterion                       0.100D-04
+Optimization algorithm                                          EM
+Integration Specifications
+  Type                                                  MONTECARLO
+  Number of integration points                                5000
+  Dimensions of numerical integration                            3
+  Adaptive quadrature                                           ON
+  Monte Carlo integration seed                                   0
+Cholesky                                                       OFF
+
+Input data file(s)
+  ~/Desktop/BABIES/COPE/covid_stress_vars_preg.dat
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of missing data patterns             2
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+     PROPORTION OF DATA PRESENT FOR Y
+
+
+           Covariance Coverage
+              SELF_R        FAM_R         S_DIS_R       ACCES_R       IMPACT_R
+              ________      ________      ________      ________      ________
+ SELF_R         1.000
+ FAM_R          1.000         1.000
+ S_DIS_R        1.000         1.000         1.000
+ ACCES_R        0.997         0.997         0.997         0.997
+ IMPACT_R       1.000         1.000         1.000         0.997         1.000
+ IMPACT_V       1.000         1.000         1.000         0.997         1.000
+
+
+           Covariance Coverage
+              IMPACT_V
+              ________
+ IMPACT_V       1.000
+
+
+SUMMARY OF CENSORED LIMITS
+
+      BIRTH_R            0.000
+      PSUPP_R            0.000
+      MCARE_R            0.000
+      CHEALTH_           0.000
+
+
+COUNT PROPORTION OF ZERO, MINIMUM AND MAXIMUM VALUES
+
+      CARE_CHG    0.113         0         6
+      CUR_FIN     0.030         0        19
+      FUT_FIN     0.201         0        22
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     SELF_R                1.865       0.706       0.000   39.72%       0.000      1.000      1.000
+             725.000       3.960      -0.813       6.000    7.17%       2.000      4.000
+     FAM_R                 3.306      -0.272       0.000   14.21%       1.000      3.000      4.000
+             725.000       4.055      -1.159       6.000   17.10%       4.000      5.000
+     S_DIS_R               2.763       0.002       0.000   19.59%       1.000      2.000      3.000
+             725.000       3.767      -1.192       6.000    8.28%       3.000      5.000
+     ACCES_R               1.468       0.167       0.000    1.24%       0.833      1.167      1.500
+             723.000       0.481      -0.579       3.000    2.35%       1.667      2.000
+     IMPACT_R              4.142      -0.371       0.000    0.14%       3.000      4.000      4.000
+             725.000       1.468      -0.137       6.000   14.34%       4.000      5.000
+     IMPACT_V             -1.742       1.188      -3.000   22.34%      -3.000     -2.000     -2.000
+             725.000       1.077       2.196       3.000    0.14%      -2.000     -1.000
+
+
+     NO CONVERGENCE. PROBLEM OCCURRED IN EXPLORATORY FACTOR ANALYSIS WITH 3 FACTOR(S).
+
+
+
+
+SUMMARY OF MODEL FIT INFORMATION
+
+
+                                               Degrees of
+     Models Compared              Chi-Square    Freedom     P-Value
+
+     1-factor against 2-factor       591.180        12       0.0000
+
+
+
+RESULTS FOR EXPLORATORY FACTOR ANALYSIS
+
+
+EXPLORATORY FACTOR ANALYSIS WITH 1 FACTOR(S):
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       36
+
+Loglikelihood
+
+          H0 Value                      -18275.528
+          H0 Scaling Correction Factor      1.1719
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                   36623.056
+          Bayesian (BIC)                 36788.159
+          Sample-Size Adjusted BIC       36673.848
+            (n* = (n + 2) / 24)
+
+
+
+MINIMUM ROTATION FUNCTION VALUE       5.24323
+
+
+
+           GEOMIN ROTATED LOADINGS (* significant at 5% level)
+                  1
+              ________
+ CARE_CHG       1.000*
+ CUR_FIN        1.000*
+ FUT_FIN        1.000*
+ BIRTH_R        0.473*
+ PSUPP_R        0.453*
+ MCARE_R        0.462*
+ CHEALTH_       0.456*
+ SELF_R         0.409*
+ FAM_R          0.471*
+ S_DIS_R        0.415*
+ ACCES_R        0.541*
+ IMPACT_R       0.537*
+ IMPACT_V      -0.499*
+
+
+           GEOMIN FACTOR CORRELATIONS (* significant at 5% level)
+                  1
+              ________
+      1         1.000
+
+
+           ESTIMATED RESIDUAL VARIANCES
+              CARE_CHG      CUR_FIN       FUT_FIN       BIRTH_R       PSUPP_R
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.776         0.795
+
+
+           ESTIMATED RESIDUAL VARIANCES
+              MCARE_R       CHEALTH_      SELF_R        FAM_R         S_DIS_R
+              ________      ________      ________      ________      ________
+                0.786         0.792         0.832         0.778         0.828
+
+
+           ESTIMATED RESIDUAL VARIANCES
+              ACCES_R       IMPACT_R      IMPACT_V
+              ________      ________      ________
+                0.708         0.712         0.751
+
+
+           S.E. GEOMIN ROTATED LOADINGS
+                  1
+              ________
+ CARE_CHG       0.000
+ CUR_FIN        0.000
+ FUT_FIN        0.000
+ BIRTH_R        0.043
+ PSUPP_R        0.044
+ MCARE_R        0.041
+ CHEALTH_       0.044
+ SELF_R         0.042
+ FAM_R          0.043
+ S_DIS_R        0.038
+ ACCES_R        0.035
+ IMPACT_R       0.035
+ IMPACT_V       0.036
+
+
+           S.E. GEOMIN FACTOR CORRELATIONS
+                  1
+              ________
+      1         0.000
+
+
+           S.E. ESTIMATED RESIDUAL VARIANCES
+              CARE_CHG      CUR_FIN       FUT_FIN       BIRTH_R       PSUPP_R
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.041         0.040
+
+
+           S.E. ESTIMATED RESIDUAL VARIANCES
+              MCARE_R       CHEALTH_      SELF_R        FAM_R         S_DIS_R
+              ________      ________      ________      ________      ________
+                0.038         0.040         0.035         0.041         0.031
+
+
+           S.E. ESTIMATED RESIDUAL VARIANCES
+              ACCES_R       IMPACT_R      IMPACT_V
+              ________      ________      ________
+                0.038         0.038         0.036
+
+
+           Est./S.E. GEOMIN ROTATED LOADINGS
+                  1
+              ________
+ CARE_CHG   99997.662
+ CUR_FIN    99999.407
+ FUT_FIN    99999.892
+ BIRTH_R       10.988
+ PSUPP_R       10.354
+ MCARE_R       11.298
+ CHEALTH_      10.485
+ SELF_R         9.659
+ FAM_R         10.941
+ S_DIS_R       10.945
+ ACCES_R       15.319
+ IMPACT_R      15.321
+ IMPACT_V     -13.723
+
+
+           Est./S.E. GEOMIN FACTOR CORRELATIONS
+                  1
+              ________
+      1         0.000
+
+
+           Est./S.E. ESTIMATED RESIDUAL VARIANCES
+              CARE_CHG      CUR_FIN       FUT_FIN       BIRTH_R       PSUPP_R
+              ________      ________      ________      ________      ________
+                2.760         1.187         0.216        19.080        20.105
+
+
+           Est./S.E. ESTIMATED RESIDUAL VARIANCES
+              MCARE_R       CHEALTH_      SELF_R        FAM_R         S_DIS_R
+              ________      ________      ________      ________      ________
+               20.769        19.918        23.976        19.203        26.312
+
+
+           Est./S.E. ESTIMATED RESIDUAL VARIANCES
+              ACCES_R       IMPACT_R      IMPACT_V
+              ________      ________      ________
+               18.544        18.913        20.660
+
+
+EXPLORATORY FACTOR ANALYSIS WITH 2 FACTOR(S):
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       48
+
+Loglikelihood
+
+          H0 Value                      -17983.610
+          H0 Scaling Correction Factor      1.1258
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                   36063.221
+          Bayesian (BIC)                 36283.357
+          Sample-Size Adjusted BIC       36130.943
+            (n* = (n + 2) / 24)
+
+
+
+MINIMUM ROTATION FUNCTION VALUE       0.45395
+
+
+
+           GEOMIN ROTATED LOADINGS (* significant at 5% level)
+                  1             2
+              ________      ________
+ CARE_CHG       0.999*        0.003
+ CUR_FIN        1.024*       -0.063
+ FUT_FIN        0.990*        0.023
+ BIRTH_R        0.002         0.537*
+ PSUPP_R        0.007         0.510*
+ MCARE_R        0.066         0.463*
+ CHEALTH_      -0.030         0.554*
+ SELF_R        -0.131         0.624*
+ FAM_R         -0.076         0.638*
+ S_DIS_R        0.005         0.474*
+ ACCES_R        0.072         0.562*
+ IMPACT_R       0.135*        0.485*
+ IMPACT_V      -0.109        -0.462*
+
+
+           GEOMIN FACTOR CORRELATIONS (* significant at 5% level)
+                  1             2
+              ________      ________
+      1         1.000
+      2         0.409*        1.000
+
+
+           ESTIMATED RESIDUAL VARIANCES
+              CARE_CHG      CUR_FIN       FUT_FIN       BIRTH_R       PSUPP_R
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.710         0.737
+
+
+           ESTIMATED RESIDUAL VARIANCES
+              MCARE_R       CHEALTH_      SELF_R        FAM_R         S_DIS_R
+              ________      ________      ________      ________      ________
+                0.756         0.705         0.660         0.626         0.773
+
+
+           ESTIMATED RESIDUAL VARIANCES
+              ACCES_R       IMPACT_R      IMPACT_V
+              ________      ________      ________
+                0.646         0.693         0.733
+
+
+           S.E. GEOMIN ROTATED LOADINGS
+                  1             2
+              ________      ________
+ CARE_CHG       0.009         0.020
+ CUR_FIN        0.110         0.275
+ FUT_FIN        0.105         0.255
+ BIRTH_R        0.030         0.047
+ PSUPP_R        0.039         0.044
+ MCARE_R        0.054         0.048
+ CHEALTH_       0.057         0.042
+ SELF_R         0.103         0.084
+ FAM_R          0.105         0.083
+ S_DIS_R        0.049         0.047
+ ACCES_R        0.052         0.042
+ IMPACT_R       0.062         0.061
+ IMPACT_V       0.061         0.057
+
+
+           S.E. GEOMIN FACTOR CORRELATIONS
+                  1             2
+              ________      ________
+      1         0.000
+      2         0.204         0.000
+
+
+           S.E. ESTIMATED RESIDUAL VARIANCES
+              CARE_CHG      CUR_FIN       FUT_FIN       BIRTH_R       PSUPP_R
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.046         0.040
+
+
+           S.E. ESTIMATED RESIDUAL VARIANCES
+              MCARE_R       CHEALTH_      SELF_R        FAM_R         S_DIS_R
+              ________      ________      ________      ________      ________
+                0.038         0.037         0.073         0.070         0.036
+
+
+           S.E. ESTIMATED RESIDUAL VARIANCES
+              ACCES_R       IMPACT_R      IMPACT_V
+              ________      ________      ________
+                0.038         0.038         0.037
+
+
+           Est./S.E. GEOMIN ROTATED LOADINGS
+                  1             2
+              ________      ________
+ CARE_CHG     111.099         0.153
+ CUR_FIN        9.288        -0.229
+ FUT_FIN        9.432         0.091
+ BIRTH_R        0.071        11.535
+ PSUPP_R        0.169        11.662
+ MCARE_R        1.211         9.744
+ CHEALTH_      -0.520        13.199
+ SELF_R        -1.270         7.448
+ FAM_R         -0.724         7.700
+ S_DIS_R        0.091        10.110
+ ACCES_R        1.369        13.272
+ IMPACT_R       2.190         7.990
+ IMPACT_V      -1.797        -8.111
+
+
+           Est./S.E. GEOMIN FACTOR CORRELATIONS
+                  1             2
+              ________      ________
+      1         0.000
+      2         2.004         0.000
+
+
+           Est./S.E. ESTIMATED RESIDUAL VARIANCES
+              CARE_CHG      CUR_FIN       FUT_FIN       BIRTH_R       PSUPP_R
+              ________      ________      ________      ________      ________
+                1.803         0.726         0.148        15.546        18.246
+
+
+           Est./S.E. ESTIMATED RESIDUAL VARIANCES
+              MCARE_R       CHEALTH_      SELF_R        FAM_R         S_DIS_R
+              ________      ________      ________      ________      ________
+               19.995        18.930         9.090         8.984        21.370
+
+
+           Est./S.E. ESTIMATED RESIDUAL VARIANCES
+              ACCES_R       IMPACT_R      IMPACT_V
+              ________      ________      ________
+               16.997        18.032        20.074
+
+
+           FACTOR STRUCTURE
+                  1             2
+              ________      ________
+ CARE_CHG       1.000         0.412
+ CUR_FIN        0.998         0.356
+ FUT_FIN        1.000         0.429
+ BIRTH_R        0.222         0.538
+ PSUPP_R        0.215         0.513
+ MCARE_R        0.255         0.490
+ CHEALTH_       0.197         0.542
+ SELF_R         0.125         0.571
+ FAM_R          0.185         0.607
+ S_DIS_R        0.199         0.476
+ ACCES_R        0.302         0.592
+ IMPACT_R       0.334         0.541
+ IMPACT_V      -0.298        -0.507
+
+
+     Beginning Time:  14:55:11
+        Ending Time:  09:50:01
+       Elapsed Time:  18:54:50
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2019 Muthen & Muthen
