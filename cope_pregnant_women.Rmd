@@ -750,39 +750,66 @@ tables_list
 ## Histograms and descriptives for continuous and count variables
 
 ```{r}
-cal_env_vars <-
-  cc2_preg_cal %>% 
+cc2_preg_cal %>% 
   dplyr::select(
-    asthma_pctl,
-    low_birth_weight_pctl,
-    cardio_disease_pctl,
-    education_ce_pctl,
-    poverty_pctl,
-    housing_burden_pctl,
-    linguistic_isolation_pctl,
-    unemployment_ce_pctl
+    Asthma = asthma_pctl,
+    `Low birth weight` = low_birth_weight_pctl,
+    `Cardiovascular disease` = cardio_disease_pctl,
+    `Low education` = education_ce_pctl,
+    `Poverty` = poverty_pctl,
+    `Housing burden` = housing_burden_pctl,
+    `Linguistic isolation` = linguistic_isolation_pctl,
+    `Unemployment` = unemployment_ce_pctl
   ) %>% 
-  names()
+  gather(key, value) %>% 
+  ggplot(aes(value)) +
+  geom_histogram(binwidth = 10) +
+  theme_pubr() +
+  theme(
+    axis.title = element_blank(), 
+    axis.text.y = element_text(size = 14),
+    axis.text.x = element_text(size = 14),
+    strip.text = element_text(size = 12)
+  ) +
+  facet_wrap(.~key, scales = "free")
 
-histograms_names_ind <- 
-  cc2_preg_cal %>% 
-  dplyr::select(
-    inr_fpl,
-    prenatal_complications,
-    prenatal_support,
-    current_social_supp_rating,
-    prior_social_supp_rating,
-    social_supp_change,
-    access,
-    all_of(cal_env_vars)
-  ) %>% 
-  names()
-
-histograms_list_ind <-
-  map(histograms_names_ind, ~plot_histogram(cc2_preg_cal, .x))
-
-histograms_list_ind
+ggsave(
+  "~/Box/lucy_king_files/BABIES/cope/figures/calenviro_histograms.png",
+  width = 13,
+  height = 9
+)
 ```
+
+```{r}
+cc2_preg_cal %>% 
+  dplyr::select(
+    `Income-to-Federal Poverty Line` = inr_fpl,
+    `Prenatal medical conditions` = prenatal_complications,
+    `Support from prenatal care team` = prenatal_support,
+    `Current social support` = current_social_supp_rating,
+    `Previous social support` = prior_social_supp_rating,
+    `Change in social support` = social_supp_change,
+    `Environmental resources` =  access
+  ) %>% 
+  gather(key, value) %>% 
+  ggplot(aes(value)) +
+  geom_histogram(binwidth = 1) +
+  theme_pubr() +
+  theme(
+    axis.title = element_blank(), 
+    axis.text.y = element_text(size = 14),
+    axis.text.x = element_text(size = 14),
+    strip.text = element_text(size = 12)
+  ) +
+  facet_wrap(.~key, scales = "free")
+
+ggsave(
+  "~/Box/lucy_king_files/BABIES/cope/figures/individual_risks_histograms.png",
+  width = 13,
+  height = 9
+)
+```
+
 ```{r}
 risk_protect_vars_table <- 
   cc2_preg_cal %>% 
