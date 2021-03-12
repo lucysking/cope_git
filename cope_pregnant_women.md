@@ -36,6 +36,11 @@ Lucy S. King
       - [Elastic net with EFA items](#elastic-net-with-efa-items)
       - [Print coefficients for model with optimal
         lambda](#print-coefficients-for-model-with-optimal-lambda-1)
+  - [Additional analyses by reviewer
+    request](#additional-analyses-by-reviewer-request)
+      - [Gestational weeks and stress and
+        adversity](#gestational-weeks-and-stress-and-adversity)
+      - [Aim 4 by phases of pregnancy](#aim-4-by-phases-of-pregnancy)
   - [Export data for sharing](#export-data-for-sharing)
 
 # Environment
@@ -46,10 +51,10 @@ library(tidyverse)
 
     ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──
 
-    ## ✓ ggplot2 3.3.2     ✓ purrr   0.3.4
-    ## ✓ tibble  3.0.4     ✓ dplyr   1.0.2
+    ## ✓ ggplot2 3.3.3     ✓ purrr   0.3.4
+    ## ✓ tibble  3.0.6     ✓ dplyr   1.0.4
     ## ✓ tidyr   1.1.2     ✓ stringr 1.4.0
-    ## ✓ readr   1.4.0     ✓ forcats 0.5.0
+    ## ✓ readr   1.4.0     ✓ forcats 0.5.1
 
     ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
     ## x dplyr::filter() masks stats::filter()
@@ -79,7 +84,7 @@ library(glmnet)
     ## 
     ##     expand, pack, unpack
 
-    ## Loaded glmnet 4.0-2
+    ## Loaded glmnet 4.1-1
 
 ``` r
 library(broom)
@@ -186,8 +191,6 @@ library(codebook)
 source("R_rainclouds.R")
 source("mplus.R")
 ```
-
-    ## Warning: package 'rhdf5' was built under R version 4.0.3
 
     ## [1] "Loaded rhdf5 package"
 
@@ -300,7 +303,7 @@ cc2_preg %>%
   ) 
 ```
 
-    ## Warning: `funs()` is deprecated as of dplyr 0.8.0.
+    ## Warning: `funs()` was deprecated in dplyr 0.8.0.
     ## Please use a list of either functions or lambdas: 
     ## 
     ##   # Simple named list: 
@@ -311,8 +314,6 @@ cc2_preg %>%
     ## 
     ##   # Using lambdas
     ##   list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_warnings()` to see where this warning was generated.
 
     ## # A tibble: 1 x 24
     ##   mom_age_mean gestational_wee… ppl_in_home_all… ppl_in_home_adu… inr_fpl_mean
@@ -335,7 +336,7 @@ cc2_preg %>%
 
     ## # A tibble: 3 x 3
     ##   `epds_total >= 11`     n     per
-    ##   <lgl>              <int>   <dbl>
+    ## * <lgl>              <int>   <dbl>
     ## 1 FALSE                414 0.571  
     ## 2 TRUE                 305 0.421  
     ## 3 NA                     6 0.00828
@@ -348,7 +349,7 @@ cc2_preg %>%
 
     ## # A tibble: 3 x 3
     ##   `epds_total >= 13`     n     per
-    ##   <lgl>              <int>   <dbl>
+    ## * <lgl>              <int>   <dbl>
     ## 1 FALSE                509 0.702  
     ## 2 TRUE                 210 0.290  
     ## 3 NA                     6 0.00828
@@ -361,7 +362,7 @@ cc2_preg %>%
 
     ## # A tibble: 3 x 3
     ##   `epds_total >= 15`     n     per
-    ##   <lgl>              <int>   <dbl>
+    ## * <lgl>              <int>   <dbl>
     ## 1 FALSE                596 0.822  
     ## 2 TRUE                 123 0.170  
     ## 3 NA                     6 0.00828
@@ -373,7 +374,7 @@ cc2_preg %>%
 
     ## # A tibble: 3 x 2
     ##   `inr_fpl > 1`     n
-    ##   <lgl>         <int>
+    ## * <lgl>         <int>
     ## 1 FALSE            19
     ## 2 TRUE            705
     ## 3 NA                1
@@ -454,7 +455,7 @@ cc2_preg %>%
 
     ## # A tibble: 2 x 3
     ##   first_pregnancy     n   per
-    ##             <dbl> <int> <dbl>
+    ## *           <dbl> <int> <dbl>
     ## 1               0   367 0.506
     ## 2               1   358 0.494
 
@@ -510,7 +511,7 @@ cc2_preg %>%
 
     ## # A tibble: 2 x 2
     ##   `!is.na(address_clean)`     n
-    ##   <lgl>                   <int>
+    ## * <lgl>                   <int>
     ## 1 FALSE                     297
     ## 2 TRUE                      428
 
@@ -533,7 +534,7 @@ cc2_preg %>%
 
     ## # A tibble: 3 x 2
     ##   state_current_ca     n
-    ##   <chr>            <int>
+    ## * <chr>            <int>
     ## 1 CA                 353
     ## 2 Other state         75
     ## 3 <NA>               297
@@ -545,7 +546,7 @@ cc2_preg %>%
 
     ## # A tibble: 2 x 2
     ##   `!is.na(ca_county)`     n
-    ##   <lgl>               <int>
+    ## * <lgl>               <int>
     ## 1 FALSE                 382
     ## 2 TRUE                  343
 
@@ -596,7 +597,7 @@ cc2_preg %>%
 
     ## # A tibble: 2 x 3
     ##   past_mh_sa_treatment     n   per
-    ##   <chr>                <int> <dbl>
+    ## * <chr>                <int> <dbl>
     ## 1 none                   429 0.592
     ## 2 past treatment         296 0.408
 
@@ -607,7 +608,7 @@ cc2_preg %>%
 
     ## # A tibble: 3 x 2
     ##   self_test     n
-    ##       <dbl> <int>
+    ## *     <dbl> <int>
     ## 1         0   721
     ## 2         1     3
     ## 3        NA     1
@@ -934,7 +935,7 @@ stress_vars_preg %>%
     ## Correlation method: 'kendall'
     ## Missing treated using: 'pairwise.complete.obs'
 
-    ##                        rowname future_job_distress current_job_distress
+    ##                           term future_job_distress current_job_distress
     ## 1          future_job_distress                                         
     ## 2         current_job_distress                 .68                     
     ## 3          impact_covid_rating                 .29                  .32
@@ -1938,7 +1939,7 @@ stress_vars_preg %>%
     ## Correlation method: 'pearson'
     ## Missing treated using: 'pairwise.complete.obs'
 
-    ##                                  rowname f2_score f1_score
+    ##                                     term f2_score f1_score
     ## 1                               f2_score                  
     ## 2                               f1_score      .48         
     ## 3         Distress due to reduced access      .85      .32
@@ -2402,125 +2403,81 @@ tables_list
 ## Histograms and descriptives for continuous and count variables
 
 ``` r
-cal_env_vars <-
-  cc2_preg_cal %>% 
+cc2_preg_cal %>% 
   dplyr::select(
-    asthma_pctl,
-    low_birth_weight_pctl,
-    cardio_disease_pctl,
-    education_ce_pctl,
-    poverty_pctl,
-    housing_burden_pctl,
-    linguistic_isolation_pctl,
-    unemployment_ce_pctl
+    Asthma = asthma_pctl,
+    `Low birth weight` = low_birth_weight_pctl,
+    `Cardiovascular disease` = cardio_disease_pctl,
+    `Low education` = education_ce_pctl,
+    `Poverty` = poverty_pctl,
+    `Housing burden` = housing_burden_pctl,
+    `Linguistic isolation` = linguistic_isolation_pctl,
+    `Unemployment` = unemployment_ce_pctl
   ) %>% 
-  names()
-
-histograms_names_ind <- 
-  cc2_preg_cal %>% 
-  dplyr::select(
-    inr_fpl,
-    prenatal_complications,
-    prenatal_support,
-    current_social_supp_rating,
-    prior_social_supp_rating,
-    social_supp_change,
-    access,
-    all_of(cal_env_vars)
-  ) %>% 
-  names()
-
-histograms_list_ind <-
-  map(histograms_names_ind, ~plot_histogram(cc2_preg_cal, .x))
-
-histograms_list_ind
+  gather(key, value) %>% 
+  ggplot(aes(value)) +
+  geom_histogram(binwidth = 10) +
+  theme_pubr() +
+  theme(
+    axis.title = element_blank(), 
+    axis.text.y = element_text(size = 14),
+    axis.text.x = element_text(size = 14),
+    strip.text = element_text(size = 12)
+  ) +
+  facet_wrap(.~key, scales = "free")
 ```
 
-    ## [[1]]
-
-    ## Warning: Removed 1 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
 ![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
 
-    ## 
-    ## [[2]]
+``` r
+ggsave(
+  "~/Box/lucy_king_files/BABIES/cope/figures/calenviro_histograms.png",
+  width = 13,
+  height = 9
+)
+```
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-2.png)<!-- -->
+    ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-    ## 
-    ## [[3]]
+``` r
+cc2_preg_cal %>% 
+  dplyr::select(
+    `Income-to-Federal Poverty Line` = inr_fpl,
+    `Prenatal medical conditions` = prenatal_complications,
+    `Support from prenatal care team` = prenatal_support,
+    `Current social support` = current_social_supp_rating,
+    `Previous social support` = prior_social_supp_rating,
+    `Change in social support` = social_supp_change,
+    `Environmental resources` =  access
+  ) %>% 
+  gather(key, value) %>% 
+  ggplot(aes(value)) +
+  geom_histogram(binwidth = 1) +
+  theme_pubr() +
+  theme(
+    axis.title = element_blank(), 
+    axis.text.y = element_text(size = 14),
+    axis.text.x = element_text(size = 14),
+    strip.text = element_text(size = 12)
+  ) +
+  facet_wrap(.~key, scales = "free")
+```
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-3.png)<!-- -->
+    ## Warning: Removed 1 rows containing non-finite values (stat_bin).
 
-    ## 
-    ## [[4]]
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-4.png)<!-- -->
+``` r
+ggsave(
+  "~/Box/lucy_king_files/BABIES/cope/figures/individual_risks_histograms.png",
+  width = 13,
+  height = 9
+)
+```
 
-    ## 
-    ## [[5]]
-
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-5.png)<!-- -->
-
-    ## 
-    ## [[6]]
-
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-6.png)<!-- -->
-
-    ## 
-    ## [[7]]
-
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-7.png)<!-- -->
-
-    ## 
-    ## [[8]]
-
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-8.png)<!-- -->
-
-    ## 
-    ## [[9]]
-
-    ## Warning: Removed 2 rows containing non-finite values (stat_bin).
-
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-9.png)<!-- -->
-
-    ## 
-    ## [[10]]
-
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-10.png)<!-- -->
-
-    ## 
-    ## [[11]]
-
-    ## Warning: Removed 4 rows containing non-finite values (stat_bin).
-
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-11.png)<!-- -->
-
-    ## 
-    ## [[12]]
-
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-12.png)<!-- -->
-
-    ## 
-    ## [[13]]
-
-    ## Warning: Removed 2 rows containing non-finite values (stat_bin).
-
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-13.png)<!-- -->
-
-    ## 
-    ## [[14]]
-
-    ## Warning: Removed 2 rows containing non-finite values (stat_bin).
-
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-14.png)<!-- -->
-
-    ## 
-    ## [[15]]
-
-    ## Warning: Removed 2 rows containing non-finite values (stat_bin).
-
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-32-15.png)<!-- -->
+    ## Warning: Removed 1 rows containing non-finite values (stat_bin).
 
 ``` r
 risk_protect_vars_table <- 
@@ -3171,6 +3128,20 @@ z_score <- function(x) {
 ```
 
 ``` r
+cal_env_vars <-
+  cc2_preg_cal %>% 
+  dplyr::select(
+    asthma_pctl,
+    low_birth_weight_pctl,
+    cardio_disease_pctl,
+    education_ce_pctl,
+    poverty_pctl,
+    housing_burden_pctl,
+    linguistic_isolation_pctl,
+    unemployment_ce_pctl
+  ) %>% 
+  names()
+
 cc2_preg_cal_en <-
   cc2_preg_cal %>% 
   dplyr::select(
@@ -3227,7 +3198,7 @@ fit_net_cope_f1 <- glmnet(
 plot(fit_net_cope_f1, label = TRUE)
 ```
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
 
 #### F2 model
 
@@ -3241,7 +3212,7 @@ fit_net_cope_f2 <- glmnet(
 plot(fit_net_cope_f2, label = TRUE)
 ```
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
 
 ### Run leave-one-out cross validation to identify optimal lambda value
 
@@ -3486,7 +3457,7 @@ en_coef_tbl_f1 %>%
   )
 ```
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-48-1.png)<!-- -->
 
 ``` r
 ggsave(
@@ -3649,7 +3620,7 @@ en_coef_tbl_f2 %>%
   )
 ```
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-50-1.png)<!-- -->
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-51-1.png)<!-- -->
 
 ``` r
 ggsave(
@@ -3738,7 +3709,7 @@ cc2_preg_cal %>%
     ## Warning: attributes are not identical across measure variables;
     ## they will be dropped
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-51-1.png)<!-- -->
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-52-1.png)<!-- -->
 
 ``` r
 ggsave(
@@ -3790,7 +3761,7 @@ cc2_preg_cal %>%
 
     ## Warning: Removed 16 rows containing missing values (geom_point).
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-52-1.png)<!-- -->
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-53-1.png)<!-- -->
 
 ``` r
 # community-level
@@ -3839,7 +3810,7 @@ cc2_preg_cal %>%
 
     ## Warning: Removed 4 rows containing missing values (geom_point).
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-53-1.png)<!-- -->
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-54-1.png)<!-- -->
 
 ``` r
 ggsave(
@@ -3903,7 +3874,7 @@ cc2_preg_cal %>%
 
     ## Warning: Removed 12 rows containing missing values (geom_point).
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-54-1.png)<!-- -->
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-55-1.png)<!-- -->
 
 ``` r
 ggsave(
@@ -4061,7 +4032,9 @@ cohens_d(cc2_preg_cal_en$f1_score, cc2_preg_cal_en$first_pregnancy_f)
 
     ## Cohen's d |        95% CI
     ## -------------------------
-    ##     -0.15 | [-0.37, 0.07]
+    ## -0.15     | [-0.37, 0.07]
+    ## 
+    ## - Estimated using pooled SD.
 
 ``` r
 cohens_d(cc2_preg_cal_en$f1_score, cc2_preg_cal_en$immigrant_f)
@@ -4069,7 +4042,9 @@ cohens_d(cc2_preg_cal_en$f1_score, cc2_preg_cal_en$immigrant_f)
 
     ## Cohen's d |        95% CI
     ## -------------------------
-    ##     -0.20 | [-0.47, 0.07]
+    ## -0.20     | [-0.47, 0.07]
+    ## 
+    ## - Estimated using pooled SD.
 
 ``` r
 cohens_d(cc2_preg_cal_en$f1_score, cc2_preg_cal_en$history_mh_disorder_f)
@@ -4077,7 +4052,9 @@ cohens_d(cc2_preg_cal_en$f1_score, cc2_preg_cal_en$history_mh_disorder_f)
 
     ## Cohen's d |        95% CI
     ## -------------------------
-    ##     -0.20 | [-0.45, 0.05]
+    ## -0.20     | [-0.45, 0.05]
+    ## 
+    ## - Estimated using pooled SD.
 
 #### F2
 
@@ -4158,7 +4135,7 @@ cc2_preg_cal %>%
     ## Warning: attributes are not identical across measure variables;
     ## they will be dropped
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-56-1.png)<!-- -->
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-57-1.png)<!-- -->
 
 ``` r
 ggsave(
@@ -4216,7 +4193,7 @@ cc2_preg_cal %>%
 
     ## Warning: Removed 6 rows containing missing values (geom_point).
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-57-1.png)<!-- -->
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-58-1.png)<!-- -->
 
 ``` r
 ggsave(
@@ -4282,7 +4259,7 @@ cc2_preg_cal %>%
 
     ## Warning: Removed 12 rows containing missing values (geom_point).
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-58-1.png)<!-- -->
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-59-1.png)<!-- -->
 
 ``` r
 ggsave(
@@ -4420,7 +4397,9 @@ cohens_d(cc2_preg_cal_en$f2_score, cc2_preg_cal_en$first_pregnancy_f)
 
     ## Cohen's d |         95% CI
     ## --------------------------
-    ##     -0.28 | [-0.50, -0.06]
+    ## -0.28     | [-0.50, -0.06]
+    ## 
+    ## - Estimated using pooled SD.
 
 ``` r
 cohens_d(cc2_preg_cal_en$f2_score, cc2_preg_cal_en$history_mh_disorder_f)
@@ -4428,7 +4407,9 @@ cohens_d(cc2_preg_cal_en$f2_score, cc2_preg_cal_en$history_mh_disorder_f)
 
     ## Cohen's d |         95% CI
     ## --------------------------
-    ##     -0.26 | [-0.51, -0.01]
+    ## -0.26     | [-0.51, -0.01]
+    ## 
+    ## - Estimated using pooled SD.
 
 ``` r
 cohens_d(cc2_preg_cal_en$f2_score, cc2_preg_cal_en$covid_high_risk_self_f)
@@ -4436,7 +4417,9 @@ cohens_d(cc2_preg_cal_en$f2_score, cc2_preg_cal_en$covid_high_risk_self_f)
 
     ## Cohen's d |         95% CI
     ## --------------------------
-    ##     -0.44 | [-0.70, -0.18]
+    ## -0.44     | [-0.70, -0.18]
+    ## 
+    ## - Estimated using pooled SD.
 
 ``` r
 cohens_d(cc2_preg_cal_en$f2_score, cc2_preg_cal_en$race_poc_f)
@@ -4444,7 +4427,9 @@ cohens_d(cc2_preg_cal_en$f2_score, cc2_preg_cal_en$race_poc_f)
 
     ## Cohen's d |         95% CI
     ## --------------------------
-    ##     -0.31 | [-0.54, -0.09]
+    ## -0.31     | [-0.54, -0.09]
+    ## 
+    ## - Estimated using pooled SD.
 
 # Aim 4
 
@@ -4508,8 +4493,8 @@ model_parameters(epds_lm, bootstrap = TRUE)
 
     ## Parameter   | Coefficient |        95% CI |      p
     ## --------------------------------------------------
-    ## (Intercept) |   -5.62e-18 | [ 0.00, 0.00] | 0.973 
-    ## f1_score    |        0.03 | [-0.05, 0.11] | 0.384 
+    ## (Intercept) |   -5.62e-18 | [ 0.00, 0.00] | 0.986 
+    ## f1_score    |        0.03 | [-0.05, 0.11] | 0.392 
     ## f2_score    |        0.43 | [ 0.35, 0.51] | < .001
 
 ``` r
@@ -4578,8 +4563,8 @@ model_parameters(epds_lm_cal, bootstrap = TRUE)
 
     ## Parameter   | Coefficient |        95% CI |      p
     ## --------------------------------------------------
-    ## (Intercept) |    6.10e-19 | [ 0.00, 0.00] | 0.997 
-    ## f1_score    |        0.04 | [-0.07, 0.16] | 0.478 
+    ## (Intercept) |    6.10e-19 | [ 0.00, 0.00] | 0.966 
+    ## f1_score    |        0.04 | [-0.07, 0.16] | 0.477 
     ## f2_score    |        0.43 | [ 0.31, 0.54] | < .001
 
 ``` r
@@ -4588,9 +4573,9 @@ model_performance(epds_lm_cal)
 
     ## # Indices of model performance
     ## 
-    ##    AIC |    BIC |   R2 | R2_adjusted | RMSE | Sigma
-    ## ---------------------------------------------------
-    ## 901.29 | 916.64 | 0.21 |        0.20 | 0.89 |  0.89
+    ## AIC     |     BIC |    R2 | R2 (adj.) |  RMSE | Sigma
+    ## -----------------------------------------------------
+    ## 901.286 | 916.637 | 0.206 |     0.201 | 0.890 | 0.894
 
 ## Visualize effects of factor scores on EPDS in full sample
 
@@ -4636,7 +4621,7 @@ cc2_preg %>%
 
     ## Warning: Removed 12 rows containing missing values (geom_point).
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-62-1.png)<!-- -->
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-63-1.png)<!-- -->
 
 ``` r
 ggsave(
@@ -4702,7 +4687,7 @@ fit_net_cope_epds <- glmnet(stress_predictors, epds_score, family = "gaussian", 
 plot(fit_net_cope_epds, label = TRUE)
 ```
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-65-1.png)<!-- -->
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-66-1.png)<!-- -->
 
 ### Run leave-one-out cross validation to identify optimal lambda value
 
@@ -4867,7 +4852,7 @@ en_coef_tbl_epds %>%
   )
 ```
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-71-1.png)<!-- -->
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-72-1.png)<!-- -->
 
 ``` r
 ggsave(
@@ -4922,7 +4907,7 @@ cc2_preg %>%
 
     ## Warning: Removed 60 rows containing missing values (geom_point).
 
-![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-72-1.png)<!-- -->
+![](cope_pregnant_women_files/figure-gfm/unnamed-chunk-73-1.png)<!-- -->
 
 ``` r
 ggsave(
@@ -5014,6 +4999,237 @@ sample estimates:
       cor 
 0.3427079 
 ```
+
+# Additional analyses by reviewer request
+
+## Gestational weeks and stress and adversity
+
+``` r
+cor.test(cc2_preg$f1_score, cc2_preg$gestational_weeks)
+```
+
+``` 
+
+    Pearson's product-moment correlation
+
+data:  cc2_preg$f1_score and cc2_preg$gestational_weeks
+t = 0.42219, df = 723, p-value = 0.673
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.05717903  0.08841170
+sample estimates:
+       cor 
+0.01569955 
+```
+
+``` r
+cor.test(cc2_preg$f2_score, cc2_preg$gestational_weeks)
+```
+
+``` 
+
+    Pearson's product-moment correlation
+
+data:  cc2_preg$f2_score and cc2_preg$gestational_weeks
+t = 3.2989, df = 723, p-value = 0.001018
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.04939964 0.19287784
+sample estimates:
+      cor 
+0.1217748 
+```
+
+## Aim 4 by phases of pregnancy
+
+``` r
+max_gestational_weeks <- max(cc2_preg$gestational_weeks, na.rm = TRUE)
+
+cc2_preg <-
+  cc2_preg %>% 
+  mutate(
+    trimester = as.factor(
+      case_when(
+        gestational_weeks < 14 ~ "first",
+        gestational_weeks >= 14 & gestational_weeks < 26 ~ "second",
+        gestational_weeks >= 16 & gestational_weeks <= max_gestational_weeks ~ "third",
+      )
+    ),
+    pregnancy_stage = as.factor(
+      case_when(
+        gestational_weeks <= 20 ~ "earlier", 
+        gestational_weeks > 20 & gestational_weeks <= max_gestational_weeks ~ "later"
+      )
+    )
+  )
+
+cc2_preg %>% 
+  count(trimester)
+```
+
+    ## # A tibble: 3 x 2
+    ##   trimester     n
+    ## * <fct>     <int>
+    ## 1 first        74
+    ## 2 second      231
+    ## 3 third       420
+
+``` r
+cc2_preg %>% 
+  count(pregnancy_stage)
+```
+
+    ## # A tibble: 2 x 2
+    ##   pregnancy_stage     n
+    ## * <fct>           <int>
+    ## 1 earlier           175
+    ## 2 later             550
+
+``` r
+cc2_preg_earlier <-
+  cc2_preg %>% 
+  filter(pregnancy_stage == "earlier")
+
+epds_lm_earlier <-
+  lm(
+    scale(epds_total) ~
+      scale(f1_score) +
+      scale(f2_score),
+    data = cc2_preg_earlier
+  )
+
+summary(epds_lm_earlier)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = scale(epds_total) ~ scale(f1_score) + scale(f2_score), 
+    ##     data = cc2_preg_earlier)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -2.3624 -0.5822 -0.0228  0.6483  3.2175 
+    ## 
+    ## Coefficients:
+    ##                  Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)      0.002508   0.070903   0.035    0.972    
+    ## scale(f1_score) -0.040995   0.084764  -0.484    0.629    
+    ## scale(f2_score)  0.388947   0.084875   4.583 8.83e-06 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.9352 on 171 degrees of freedom
+    ##   (1 observation deleted due to missingness)
+    ## Multiple R-squared:  0.1355, Adjusted R-squared:  0.1254 
+    ## F-statistic:  13.4 on 2 and 171 DF,  p-value: 3.932e-06
+
+``` r
+model_parameters(epds_lm_earlier, bootstrap = TRUE)
+```
+
+    ## Parameter   | Coefficient |        95% CI |      p
+    ## --------------------------------------------------
+    ## (Intercept) |    1.24e-17 | [ 0.00, 0.00] | 0.960 
+    ## f1_score    |       -0.03 | [-0.22, 0.15] | 0.722 
+    ## f2_score    |        0.38 | [ 0.22, 0.56] | < .001
+
+``` r
+calc.relimp(epds_lm_earlier)
+```
+
+    ## Response variable: scale(epds_total) 
+    ## Total response variance: 1 
+    ## Analysis based on 174 observations 
+    ## 
+    ## 2 Regressors: 
+    ## scale(f1_score) scale(f2_score) 
+    ## Proportion of variance explained by model: 13.55%
+    ## Metrics are not normalized (rela=FALSE). 
+    ## 
+    ## Relative importance metrics: 
+    ## 
+    ##                       lmg
+    ## scale(f1_score) 0.0152416
+    ## scale(f2_score) 0.1202304
+    ## 
+    ## Average coefficients for different model sizes: 
+    ## 
+    ##                        1X         2Xs
+    ## scale(f1_score) 0.1709928 -0.04099541
+    ## scale(f2_score) 0.3665450  0.38894716
+
+``` r
+cc2_preg_later <-
+  cc2_preg %>% 
+  filter(pregnancy_stage == "later")
+
+epds_lm_later <-
+  lm(
+    scale(epds_total) ~
+      scale(f1_score) +
+      scale(f2_score),
+    data = cc2_preg_later
+  )
+
+summary(epds_lm_later)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = scale(epds_total) ~ scale(f1_score) + scale(f2_score), 
+    ##     data = cc2_preg_later)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -2.1533 -0.6034 -0.0255  0.5361  3.6528 
+    ## 
+    ## Coefficients:
+    ##                  Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)     0.0005256  0.0376982   0.014    0.989    
+    ## scale(f1_score) 0.0582560  0.0424669   1.372    0.171    
+    ## scale(f2_score) 0.4464037  0.0423206  10.548   <2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.8801 on 542 degrees of freedom
+    ##   (5 observations deleted due to missingness)
+    ## Multiple R-squared:  0.2283, Adjusted R-squared:  0.2255 
+    ## F-statistic: 80.18 on 2 and 542 DF,  p-value: < 2.2e-16
+
+``` r
+model_parameters(epds_lm_later, bootstrap = TRUE)
+```
+
+    ## Parameter   | Coefficient |        95% CI |      p
+    ## --------------------------------------------------
+    ## (Intercept) |    4.47e-18 | [ 0.00, 0.00] | 0.985 
+    ## f1_score    |        0.06 | [-0.02, 0.14] | 0.156 
+    ## f2_score    |        0.45 | [ 0.35, 0.53] | < .001
+
+``` r
+calc.relimp(epds_lm_later)
+```
+
+    ## Response variable: scale(epds_total) 
+    ## Total response variance: 1 
+    ## Analysis based on 545 observations 
+    ## 
+    ## 2 Regressors: 
+    ## scale(f1_score) scale(f2_score) 
+    ## Proportion of variance explained by model: 22.83%
+    ## Metrics are not normalized (rela=FALSE). 
+    ## 
+    ## Relative importance metrics: 
+    ## 
+    ##                        lmg
+    ## scale(f1_score) 0.03629331
+    ## scale(f2_score) 0.19202674
+    ## 
+    ## Average coefficients for different model sizes: 
+    ## 
+    ##                        1X        2Xs
+    ## scale(f1_score) 0.2642438 0.05825596
+    ## scale(f2_score) 0.4731003 0.44640365
 
 # Export data for sharing
 

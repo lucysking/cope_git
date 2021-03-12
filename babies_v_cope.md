@@ -29,7 +29,15 @@ Lucy S. King
       - [Visualize main effect](#visualize-main-effect)
   - [Compare participants in COVID-19 subset to participants in full
     cohort](#compare-participants-in-covid-19-subset-to-participants-in-full-cohort)
-  - [EPDS \~ gestational age](#epds-gestational-age)
+  - [EPDS \~ gestational age](#epds--gestational-age)
+  - [Additional analyses at reviewer
+    request](#additional-analyses-at-reviewer-request)
+      - [Aim 1 analysis with all available
+        data](#aim-1-analysis-with-all-available-data)
+      - [Associations between gestational weeks and depressive
+        symptoms](#associations-between-gestational-weeks-and-depressive-symptoms)
+      - [Aim 1 by phases of pregnancy](#aim-1-by-phases-of-pregnancy)
+      - [EPDS 3A: Anxiety symptoms](#epds-3a-anxiety-symptoms)
   - [Export data to share](#export-data-to-share)
 
 # Set up environment
@@ -41,10 +49,10 @@ library(tidyverse)
 
     ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──
 
-    ## ✓ ggplot2 3.3.2     ✓ purrr   0.3.4
-    ## ✓ tibble  3.0.4     ✓ dplyr   1.0.2
+    ## ✓ ggplot2 3.3.3     ✓ purrr   0.3.4
+    ## ✓ tibble  3.0.6     ✓ dplyr   1.0.4
     ## ✓ tidyr   1.1.2     ✓ stringr 1.4.0
-    ## ✓ readr   1.4.0     ✓ forcats 0.5.0
+    ## ✓ readr   1.4.0     ✓ forcats 0.5.1
 
     ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
     ## x dplyr::filter() masks stats::filter()
@@ -215,14 +223,15 @@ babies <-
   ) %>% 
   left_join(
     read_csv(babies_epds_file) %>% 
-      dplyr::select(-epds_t3, -epds_t3_concern),
+      dplyr::select(ID, epds_total_t1, epds_3a_t1),
     by = "ID"
   ) %>% 
   mutate(cohort = "Pre-pandemic") %>% 
   dplyr::select(
     ID,
     cohort,
-    epds_total = epds_t1,
+    epds_total = epds_total_t1,
+    epds_3A = epds_3a_t1,
     everything()
   ) %>% 
   mutate(
@@ -278,7 +287,7 @@ babies <-
     ##   past_mh_sa_treatment = col_double()
     ## )
 
-    ## Warning: `funs()` is deprecated as of dplyr 0.8.0.
+    ## Warning: `funs()` was deprecated in dplyr 0.8.0.
     ## Please use a list of either functions or lambdas: 
     ## 
     ##   # Simple named list: 
@@ -289,16 +298,17 @@ babies <-
     ## 
     ##   # Using lambdas
     ##   list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_warnings()` to see where this warning was generated.
 
     ## 
     ## ── Column specification ────────────────────────────────────────────────────────
     ## cols(
     ##   ID = col_double(),
-    ##   epds_t1 = col_double(),
-    ##   epds_t2 = col_double(),
-    ##   epds_t3 = col_double(),
+    ##   epds_total_t3 = col_double(),
+    ##   epds_total_t2 = col_double(),
+    ##   epds_total_t1 = col_double(),
+    ##   epds_3a_t3 = col_double(),
+    ##   epds_3a_t2 = col_double(),
+    ##   epds_3a_t1 = col_double(),
     ##   epds_t1_concern = col_character(),
     ##   epds_t2_concern = col_character(),
     ##   epds_t3_concern = col_character(),
@@ -375,7 +385,11 @@ cope <-
       past_mh_sa_treatment,
       "past treatment" = 1,
       "none" = 0
-    )
+    ),
+    epds_3A = mean(
+      c(epds_3, epds_4, epds_5),
+      na.rm = TRUE
+    ) * 3
   ) 
 ```
 
@@ -553,7 +567,7 @@ d %>%
 
     ## # A tibble: 2 x 3
     ##   first_pregnancy     n   per
-    ##             <dbl> <int> <dbl>
+    ## *           <dbl> <int> <dbl>
     ## 1               0    64 0.727
     ## 2               1    24 0.273
 
@@ -602,7 +616,7 @@ d %>%
 
     ## # A tibble: 3 x 3
     ##   `income_numeric > 1e+05`     n    per
-    ##   <lgl>                    <int>  <dbl>
+    ## * <lgl>                    <int>  <dbl>
     ## 1 FALSE                       26 0.295 
     ## 2 TRUE                        61 0.693 
     ## 3 NA                           1 0.0114
@@ -616,7 +630,7 @@ d %>%
 
     ## # A tibble: 3 x 3
     ##   low_income     n    per
-    ##        <dbl> <int>  <dbl>
+    ## *      <dbl> <int>  <dbl>
     ## 1          0    76 0.864 
     ## 2          1     7 0.0795
     ## 3         NA     5 0.0568
@@ -696,10 +710,49 @@ d %>%
 
     ## # A tibble: 3 x 3
     ##   past_mh_sa_treatment     n    per
-    ##                  <dbl> <int>  <dbl>
+    ## *                <dbl> <int>  <dbl>
     ## 1                    0    29 0.330 
     ## 2                    1    58 0.659 
     ## 3                   NA     1 0.0114
+
+``` r
+d %>% 
+  filter(cohort == "Pre-pandemic") %>% 
+  count(epds_total >= 11) %>% 
+  mutate(per = n / sum(n))
+```
+
+    ## # A tibble: 2 x 3
+    ##   `epds_total >= 11`     n   per
+    ## * <lgl>              <int> <dbl>
+    ## 1 FALSE                 66  0.75
+    ## 2 TRUE                  22  0.25
+
+``` r
+d %>% 
+  filter(cohort == "Pre-pandemic") %>% 
+  count(epds_total >= 13) %>% 
+  mutate(per = n / sum(n))
+```
+
+    ## # A tibble: 2 x 3
+    ##   `epds_total >= 13`     n   per
+    ## * <lgl>              <int> <dbl>
+    ## 1 FALSE                 72 0.818
+    ## 2 TRUE                  16 0.182
+
+``` r
+d %>% 
+  filter(cohort == "Pre-pandemic") %>% 
+  count(epds_total >= 15) %>% 
+  mutate(per = n / sum(n))
+```
+
+    ## # A tibble: 2 x 3
+    ##   `epds_total >= 15`     n   per
+    ## * <lgl>              <int> <dbl>
+    ## 1 FALSE                 79 0.898
+    ## 2 TRUE                   9 0.102
 
 # Distributions
 
@@ -739,7 +792,7 @@ d %>%
 
     ## Warning: Removed 26 rows containing non-finite values (stat_density).
 
-![](babies_v_cope_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](babies_v_cope_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 ``` r
 ggsave(
@@ -793,7 +846,7 @@ counts_table <-
   ungroup()
 ```
 
-    ## `summarise()` regrouping output by 'cohort' (override with `.groups` argument)
+    ## `summarise()` has grouped output by 'cohort'. You can override using the `.groups` argument.
 
 # Test initial differences
 
@@ -967,7 +1020,7 @@ d %>%
 
     ## # A tibble: 19 x 2
     ##    ca_county         n
-    ##    <chr>         <int>
+    ##  * <chr>         <int>
     ##  1 Alameda          68
     ##  2 Contra Costa     23
     ##  3 Fresno            1
@@ -1118,7 +1171,7 @@ plot(
 )
 ```
 
-![](babies_v_cope_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+![](babies_v_cope_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
 
 ``` r
 # save matched data
@@ -1175,16 +1228,16 @@ s.out_cem
     ## 
     ## Summary of Balance for Matched Data:
     ##                      Means Treated Means Control Std. Mean Diff. Var. Ratio
-    ## mom_age                    33.6399       33.6054          0.0067     1.1535
-    ## gestational_weeks          24.8143       24.3917          0.0749     0.9561
-    ## ppl_in_home_allchild        0.4000        0.4000          0.0000     1.0070
-    ## first_pregnancy             0.5500        0.5500          0.0000          .
+    ## mom_age                    33.5536       33.4352          0.0232     0.9729
+    ## gestational_weeks          24.1044       23.9167          0.0333     1.1406
+    ## ppl_in_home_allchild        0.3077        0.3077          0.0000     0.9956
+    ## first_pregnancy             0.5385        0.5385          0.0000          .
     ## partnered                   1.0000        1.0000          0.0000          .
-    ## employed                    0.9000        0.9000          0.0000          .
-    ## past_mh_sa_treatment        0.6500        0.6500          0.0000          .
+    ## employed                    0.8846        0.8846          0.0000          .
+    ## past_mh_sa_treatment        0.7308        0.7308         -0.0000          .
     ##                      eCDF Mean eCDF Max Std. Pair Dist.
-    ## mom_age                 0.0243   0.1000          0.2008
-    ## gestational_weeks       0.0247   0.1417          0.2399
+    ## mom_age                 0.0281   0.2051          0.1359
+    ## gestational_weeks       0.0295   0.1987          0.2524
     ## ppl_in_home_allchild    0.0000   0.0000          0.0000
     ## first_pregnancy         0.0000   0.0000          0.0000
     ## partnered               0.0000   0.0000          0.0000
@@ -1193,20 +1246,20 @@ s.out_cem
     ## 
     ## Percent Balance Improvement:
     ##                      Std. Mean Diff. Var. Ratio eCDF Mean eCDF Max
-    ## mom_age                         97.3       51.1      70.2     40.5
-    ## gestational_weeks               68.4       95.2      76.0     39.4
-    ## ppl_in_home_allchild           100.0       98.8     100.0    100.0
-    ## first_pregnancy                100.0          .     100.0    100.0
-    ## partnered                      100.0          .     100.0    100.0
-    ## employed                       100.0          .     100.0    100.0
-    ## past_mh_sa_treatment           100.0          .     100.0    100.0
+    ## mom_age                         90.6       90.6      65.5      -22
+    ## gestational_weeks               86.0       85.9      71.4       15
+    ## ppl_in_home_allchild           100.0       99.2     100.0      100
+    ## first_pregnancy                100.0          .     100.0      100
+    ## partnered                      100.0          .     100.0      100
+    ## employed                       100.0          .     100.0      100
+    ## past_mh_sa_treatment           100.0          .     100.0      100
     ## 
     ## Sample Sizes:
     ##               Control Treated
     ## All            322.        82
-    ## Matched (ESS)   23.08      20
-    ## Matched         32.        20
-    ## Unmatched      290.        62
+    ## Matched (ESS)   23.45      26
+    ## Matched         29.        26
+    ## Unmatched      293.        56
     ## Discarded        0.         0
 
 ``` r
@@ -1216,7 +1269,7 @@ plot(
 )
 ```
 
-![](babies_v_cope_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+![](babies_v_cope_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
 
 ``` r
 # save matched data
@@ -1227,9 +1280,9 @@ d_matched_cem %>%
 
     ## # A tibble: 2 x 2
     ##   cohort           n
-    ##   <fct>        <int>
-    ## 1 COVID-19        32
-    ## 2 Pre-pandemic    20
+    ## * <fct>        <int>
+    ## 1 COVID-19        29
+    ## 2 Pre-pandemic    26
 
 ## Distributions of matched data
 
@@ -1267,7 +1320,7 @@ d_matched %>%
   facet_wrap(.~key, scales = "free")
 ```
 
-![](babies_v_cope_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+![](babies_v_cope_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
 
 ``` r
 ggsave(
@@ -1319,7 +1372,7 @@ counts_table_matched <-
   ungroup()
 ```
 
-    ## `summarise()` regrouping output by 'cohort' (override with `.groups` argument)
+    ## `summarise()` has grouped output by 'cohort'. You can override using the `.groups` argument.
 
 ``` r
 counts_table_matched
@@ -1360,7 +1413,7 @@ d_matched %>%
 
     ## # A tibble: 2 x 13
     ##   cohort ppl_in_home_all… mom_age_mean gestational_wee… ppl_in_home_all…
-    ##   <fct>             <dbl>        <dbl>            <dbl>            <dbl>
+    ## * <fct>             <dbl>        <dbl>            <dbl>            <dbl>
     ## 1 COVID…            0.878         32.6             23.9            0.880
     ## 2 Pre-p…            0.890         32.7             24.4            1.10 
     ## # … with 8 more variables: mom_age_sd <dbl>, gestational_weeks_sd <dbl>,
@@ -1570,7 +1623,9 @@ cohens_d(d_matched$epds_total, d_matched$cohort)
 
     ## Cohen's d |       95% CI
     ## ------------------------
-    ##      0.65 | [0.33, 0.96]
+    ## 0.65      | [0.33, 0.96]
+    ## 
+    ## - Estimated using pooled SD.
 
 # Adjusted OLS
 
@@ -1702,17 +1757,17 @@ epds_cutoff_table
 
 ``` r
 # relative risk of COPE vs. BABIES
-depression_cope <- epds_cutoff_table[2, 4] %>% pull()
-depression_babies <- epds_cutoff_table[4, 4] %>% pull()
-RR <- depression_cope / depression_babies
-RR
+effectsize::riskratio(table(fct_rev(d_matched$cohort), d_matched$epds_above_cutoff))
 ```
 
-    ## [1] 2
+    ## Risk ratio |       95% CI
+    ## -------------------------
+    ## 1.81       | [1.20, 2.75]
 
 ## Visualize main effect
 
 ``` r
+# color 
 d_matched %>% 
   ggplot(aes(x = fct_rev(cohort), y = epds_total, fill = cohort)) +
   geom_flat_violin(
@@ -1758,11 +1813,68 @@ d_matched %>%
   scale_fill_nejm() 
 ```
 
-![](babies_v_cope_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+![](babies_v_cope_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
 
 ``` r
 ggsave(
   "~/Box/lucy_king_files/BABIES/cope/figures/babies_cope_epds.jpeg",
+  width = 6,
+  height = 5,
+  dpi = 1000
+)
+
+
+# black and white
+d_matched %>% 
+  ggplot(aes(x = fct_rev(cohort), y = epds_total, fill = cohort)) +
+  geom_flat_violin(
+    aes(fill = cohort),
+    position = position_nudge(x = .21, y = 0), 
+    adjust = 1.5, 
+    trim = TRUE, 
+    alpha = .65, 
+    colour = NA
+  ) +
+  geom_point(
+    aes(x = as.numeric(fct_rev(cohort))-.26, y = epds_total, color = cohort),
+    position = position_jitter(width = .05), 
+    size = 2,
+    alpha = .65,
+    shape = 20
+  ) +
+  geom_boxplot(
+    aes(x = fct_rev(cohort), y = epds_total, fill = cohort),
+    outlier.shape = NA, 
+    alpha = .65, 
+    width = .4, 
+    colour = "black"
+  ) +
+  # remove grid lines, etc.
+  theme_pubr() +
+  # adjust size and position of labels
+  theme(
+    axis.title.y = element_text(size = 20),
+    axis.title.x = element_text(size = 20),
+    axis.text.y = element_text(size = 16),
+    axis.text.x = element_text(size = 16),
+    # remove legend
+    legend.position = "none"
+  ) +
+  # change names of labels
+  labs(
+    x = "Cohort",
+    y = "Prenatal depressive symptoms\n(EPDS)"
+  ) +
+  # add color pallete
+  scale_color_grey(start = 0, end = .6) +
+  scale_fill_grey(start = 0, end = .6)
+```
+
+![](babies_v_cope_files/figure-gfm/unnamed-chunk-38-2.png)<!-- -->
+
+``` r
+ggsave(
+  "~/Box/lucy_king_files/BABIES/cope/figures/babies_cope_epds_BW.jpeg",
   width = 6,
   height = 5,
   dpi = 1000
@@ -1810,7 +1922,7 @@ cope %>%
 
     ## # A tibble: 2 x 3
     ##   matched_subset  mean    sd
-    ##   <fct>          <dbl> <dbl>
+    ## * <fct>          <dbl> <dbl>
     ## 1 0               9.37  5.13
     ## 2 1              10.8   5.64
 
@@ -1838,7 +1950,9 @@ cohens_d(cope$epds_total, cope$matched_subset)
 
     ## Cohen's d |         95% CI
     ## --------------------------
-    ##     -0.28 | [-0.51, -0.05]
+    ## -0.28     | [-0.51, -0.05]
+    ## 
+    ## - Estimated using pooled SD.
 
 # EPDS \~ gestational age
 
@@ -1870,7 +1984,7 @@ d %>%
 
     ## Warning: Removed 6 rows containing missing values (geom_point).
 
-![](babies_v_cope_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
+![](babies_v_cope_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
 
 ``` r
 ggsave(
@@ -1886,6 +2000,392 @@ ggsave(
     ## Warning: Removed 6 rows containing non-finite values (stat_smooth).
     
     ## Warning: Removed 6 rows containing missing values (geom_point).
+
+# Additional analyses at reviewer request
+
+## Aim 1 analysis with all available data
+
+``` r
+d <-
+  d %>% 
+  mutate_at(
+    vars(college_or_higher, employed, poc, first_pregnancy, past_mh_sa_treatment, partnered, low_income),
+    as.factor
+  )
+
+contrasts(d$cohort) <- c(1, 0)
+
+contrasts(d$low_income) <- c(-.5, .5)
+
+contrasts(d$college_or_higher) <- c(-.5, .5)
+
+contrasts(d$employed) <- c(-.5, .5)
+
+contrasts(d$first_pregnancy) <- c(-.5, .5)
+
+contrasts(d$past_mh_sa_treatment) <- c(-.5, .5)
+
+contrasts(d$partnered) <- c(-.5, .5)
+```
+
+``` r
+lm_a1_all <- 
+  lm(
+  epds_total ~
+    cohort +
+    low_income +
+    college_or_higher +
+    employed +
+    first_pregnancy +
+    past_mh_sa_treatment +
+    partnered +
+    poc +
+    scale(mom_age, scale = FALSE) +
+    scale(gestational_weeks, scale = FALSE) +
+    scale(ppl_in_home_allchild, scale = FALSE),
+  data = d
+)
+summary(lm_a1_all)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = epds_total ~ cohort + low_income + college_or_higher + 
+    ##     employed + first_pregnancy + past_mh_sa_treatment + partnered + 
+    ##     poc + scale(mom_age, scale = FALSE) + scale(gestational_weeks, 
+    ##     scale = FALSE) + scale(ppl_in_home_allchild, scale = FALSE), 
+    ##     data = d)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -11.9537  -3.6975  -0.0868   3.3780  17.1166 
+    ## 
+    ## Coefficients:
+    ##                                             Estimate Std. Error t value
+    ## (Intercept)                                 6.680931   0.769483   8.682
+    ## cohort1                                     2.992435   0.611806   4.891
+    ## low_income1                                 1.071911   0.802108   1.336
+    ## college_or_higher1                         -0.705297   0.545968  -1.292
+    ## employed1                                  -0.652003   0.440159  -1.481
+    ## first_pregnancy1                            0.093865   0.455159   0.206
+    ## past_mh_sa_treatment1                       2.737984   0.369885   7.402
+    ## partnered1                                  1.506215   0.972996   1.548
+    ## poc1                                        0.784311   0.378569   2.072
+    ## scale(mom_age, scale = FALSE)              -0.078462   0.045196  -1.736
+    ## scale(gestational_weeks, scale = FALSE)     0.002446   0.021096   0.116
+    ## scale(ppl_in_home_allchild, scale = FALSE) -0.073254   0.239788  -0.305
+    ##                                            Pr(>|t|)    
+    ## (Intercept)                                 < 2e-16 ***
+    ## cohort1                                    1.22e-06 ***
+    ## low_income1                                  0.1818    
+    ## college_or_higher1                           0.1968    
+    ## employed1                                    0.1389    
+    ## first_pregnancy1                             0.8367    
+    ## past_mh_sa_treatment1                      3.57e-13 ***
+    ## partnered1                                   0.1220    
+    ## poc1                                         0.0386 *  
+    ## scale(mom_age, scale = FALSE)                0.0830 .  
+    ## scale(gestational_weeks, scale = FALSE)      0.9077    
+    ## scale(ppl_in_home_allchild, scale = FALSE)   0.7601    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 4.958 on 757 degrees of freedom
+    ##   (44 observations deleted due to missingness)
+    ## Multiple R-squared:  0.1057, Adjusted R-squared:  0.09267 
+    ## F-statistic: 8.131 on 11 and 757 DF,  p-value: 1.556e-13
+
+``` r
+model_parameters(lm_a1_all, standardize = "refit")
+```
+
+    ## Parameter                | Coefficient |   SE |         95% CI | t(757) |      p
+    ## --------------------------------------------------------------------------------
+    ## (Intercept)              |       -0.51 | 0.15 | [-0.80, -0.21] |  -3.42 | < .001
+    ## cohort [1]               |        0.57 | 0.12 | [ 0.34,  0.81] |   4.89 | < .001
+    ## low_income [1]           |        0.21 | 0.15 | [-0.10,  0.51] |   1.34 | 0.182 
+    ## college_or_higher [1]    |       -0.14 | 0.10 | [-0.34,  0.07] |  -1.29 | 0.197 
+    ## employed [1]             |       -0.13 | 0.08 | [-0.29,  0.04] |  -1.48 | 0.139 
+    ## first_pregnancy [1]      |        0.02 | 0.09 | [-0.15,  0.19] |   0.21 | 0.837 
+    ## past_mh_sa_treatment [1] |        0.53 | 0.07 | [ 0.39,  0.67] |   7.40 | < .001
+    ## partnered [1]            |        0.29 | 0.19 | [-0.08,  0.66] |   1.55 | 0.122 
+    ## poc [1]                  |        0.15 | 0.07 | [ 0.01,  0.29] |   2.07 | 0.039 
+    ## mom_age                  |       -0.07 | 0.04 | [-0.14,  0.01] |  -1.74 | 0.083 
+    ## gestational_weeks        |    4.02e-03 | 0.03 | [-0.06,  0.07] |   0.12 | 0.908 
+    ## ppl_in_home_allchild     |       -0.01 | 0.04 | [-0.10,  0.07] |  -0.31 | 0.760
+
+## Associations between gestational weeks and depressive symptoms
+
+``` r
+cor.test(babies$epds_total, babies$gestational_weeks)
+```
+
+``` 
+
+    Pearson's product-moment correlation
+
+data:  babies$epds_total and babies$gestational_weeks
+t = -0.54632, df = 86, p-value = 0.5863
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.2649871  0.1525120
+sample estimates:
+        cor 
+-0.05880874 
+```
+
+``` r
+cor.test(cope$epds_total, cope$gestational_weeks)
+```
+
+``` 
+
+    Pearson's product-moment correlation
+
+data:  cope$epds_total and cope$gestational_weeks
+t = 0.067652, df = 717, p-value = 0.9461
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.07060312  0.07562910
+sample estimates:
+        cor 
+0.002526497 
+```
+
+## Aim 1 by phases of pregnancy
+
+``` r
+max_gestational_weeks <- max(d_matched$gestational_weeks, na.rm = TRUE)
+
+d_matched <-
+  d_matched %>% 
+  mutate(
+    trimester = as.factor(
+      case_when(
+        gestational_weeks < 14 ~ "first",
+        gestational_weeks >= 14 & gestational_weeks < 26 ~ "second",
+        gestational_weeks >= 16 & gestational_weeks <= max_gestational_weeks ~ "third",
+      )
+    ),
+    pregnancy_stage = as.factor(
+      case_when(
+        gestational_weeks <= 20 ~ "earlier", 
+        gestational_weeks > 20 & gestational_weeks <= max_gestational_weeks ~ "later"
+      )
+    )
+  )
+
+d_matched %>% 
+  count(cohort, trimester)
+```
+
+    ## # A tibble: 6 x 3
+    ##   cohort       trimester     n
+    ##   <fct>        <fct>     <int>
+    ## 1 COVID-19     first        17
+    ## 2 COVID-19     second       28
+    ## 3 COVID-19     third        37
+    ## 4 Pre-pandemic first         1
+    ## 5 Pre-pandemic second       49
+    ## 6 Pre-pandemic third        32
+
+``` r
+d_matched %>% 
+  count(cohort, pregnancy_stage)
+```
+
+    ## # A tibble: 4 x 3
+    ##   cohort       pregnancy_stage     n
+    ##   <fct>        <fct>           <int>
+    ## 1 COVID-19     earlier            30
+    ## 2 COVID-19     later              52
+    ## 3 Pre-pandemic earlier            23
+    ## 4 Pre-pandemic later              59
+
+``` r
+contrasts(d_matched$pregnancy_stage) = c(0, 1) # earlier is baseline
+
+# test interaction
+lm_aim1_stage <-
+  lm(
+    epds_total ~ 
+      cohort * pregnancy_stage,
+    data = d_matched
+  )
+
+summary(lm_aim1_stage)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = epds_total ~ cohort * pregnancy_stage, data = d_matched)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -11.3846  -3.9631  -0.5619   3.6154  13.8475 
+    ## 
+    ## Coefficients:
+    ##                                     Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)                           9.9000     0.9924   9.976   <2e-16 ***
+    ## cohortPre-pandemic                   -2.1609     1.5064  -1.434    0.153    
+    ## pregnancy_stage1                      1.4846     1.2462   1.191    0.235    
+    ## cohortPre-pandemic:pregnancy_stage1  -2.0712     1.8271  -1.134    0.259    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 5.435 on 160 degrees of freedom
+    ## Multiple R-squared:  0.1054, Adjusted R-squared:  0.08862 
+    ## F-statistic: 6.283 on 3 and 160 DF,  p-value: 0.0004668
+
+``` r
+model_parameters(lm_aim1_stage, standardize = "refit")
+```
+
+    ## Parameter                                   | Coefficient |   SE |        95% CI | t(160) |     p
+    ## -------------------------------------------------------------------------------------------------
+    ## (Intercept)                                 |        0.14 | 0.17 | [-0.20, 0.49] |   0.83 | 0.409
+    ## cohort [Pre-pandemic]                       |       -0.38 | 0.26 | [-0.90, 0.14] |  -1.43 | 0.153
+    ## pregnancy_stage [1]                         |        0.26 | 0.22 | [-0.17, 0.69] |   1.19 | 0.235
+    ## cohort [Pre-pandemic] * pregnancy_stage [1] |       -0.36 | 0.32 | [-1.00, 0.27] |  -1.13 | 0.259
+
+``` r
+# test interaction
+lm_aim1_weeks <-
+  lm(
+    epds_total ~ 
+      cohort * gestational_weeks,
+    data = d_matched
+  )
+
+summary(lm_aim1_weeks)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = epds_total ~ cohort * gestational_weeks, data = d_matched)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -11.0594  -3.9314  -0.3747   3.4852  13.7122 
+    ## 
+    ## Coefficients:
+    ##                                      Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)                           9.64467    1.56046   6.181  5.1e-09 ***
+    ## cohortPre-pandemic                   -0.89750    3.10120  -0.289    0.773    
+    ## gestational_weeks                     0.05002    0.06018   0.831    0.407    
+    ## cohortPre-pandemic:gestational_weeks -0.10872    0.12295  -0.884    0.378    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 5.446 on 160 degrees of freedom
+    ## Multiple R-squared:  0.1019, Adjusted R-squared:  0.0851 
+    ## F-statistic: 6.054 on 3 and 160 DF,  p-value: 0.0006259
+
+``` r
+model_parameters(lm_aim1_weeks, standardize = "refit")
+```
+
+    ## Parameter                                 | Coefficient |   SE |         95% CI | t(160) |      p
+    ## -------------------------------------------------------------------------------------------------
+    ## (Intercept)                               |        0.31 | 0.11 | [ 0.10,  0.52] |   2.95 | 0.004 
+    ## cohort [Pre-pandemic]                     |       -0.62 | 0.15 | [-0.91, -0.32] |  -4.14 | < .001
+    ## gestational_weeks                         |        0.07 | 0.09 | [-0.10,  0.24] |   0.83 | 0.407 
+    ## cohort [Pre-pandemic] * gestational_weeks |       -0.16 | 0.18 | [-0.50,  0.19] |  -0.88 | 0.378
+
+``` r
+# test stratified
+d_matched_early <-
+  d_matched %>% 
+  filter(pregnancy_stage =="earlier")
+
+t.test(d_matched_early$epds_total ~ d_matched_early$cohort)
+```
+
+``` 
+
+    Welch Two Sample t-test
+
+data:  d_matched_early$epds_total by d_matched_early$cohort
+t = 1.5156, df = 49.295, p-value = 0.136
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -0.7038193  5.0255584
+sample estimates:
+    mean in group COVID-19 mean in group Pre-pandemic 
+                   9.90000                    7.73913 
+```
+
+``` r
+cohens_d(d_matched_early$epds_total, d_matched_early$cohort)
+```
+
+    ## Cohen's d |        95% CI
+    ## -------------------------
+    ## 0.42      | [-0.14, 0.96]
+    ## 
+    ## - Estimated using pooled SD.
+
+``` r
+d_matched_later <-
+  d_matched %>% 
+  filter(pregnancy_stage =="later")
+
+t.test(d_matched_later$epds_total ~ d_matched_later$cohort)
+```
+
+``` 
+
+    Welch Two Sample t-test
+
+data:  d_matched_later$epds_total by d_matched_later$cohort
+t = 3.9968, df = 104.74, p-value = 0.0001197
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ 2.132485 6.331661
+sample estimates:
+    mean in group COVID-19 mean in group Pre-pandemic 
+                 11.384615                   7.152542 
+```
+
+``` r
+cohens_d(d_matched_later$epds_total, d_matched_later$cohort)
+```
+
+    ## Cohen's d |       95% CI
+    ## ------------------------
+    ## 0.76      | [0.38, 1.15]
+    ## 
+    ## - Estimated using pooled SD.
+
+## EPDS 3A: Anxiety symptoms
+
+``` r
+t.test(d_matched$epds_3A ~ d_matched$cohort)
+```
+
+``` 
+
+    Welch Two Sample t-test
+
+data:  d_matched$epds_3A by d_matched$cohort
+t = 0.98741, df = 81, p-value = 0.3264
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -0.2585241  0.7679036
+sample estimates:
+    mean in group COVID-19 mean in group Pre-pandemic 
+                  3.840056                   3.585366 
+```
+
+``` r
+cohens_d(d_matched$epds_3A, d_matched$cohort)
+```
+
+    ## Cohen's d |        95% CI
+    ## -------------------------
+    ## 0.15      | [-0.15, 0.46]
+    ## 
+    ## - Estimated using pooled SD.
 
 # Export data to share
 
@@ -1910,6 +2410,7 @@ d_share <-
     ID,
     cohort,
     epds_total,
+    epds_3A,
     mom_age,
     mom_race,
     mom_latinx,
@@ -1957,6 +2458,13 @@ var_label(d_share) <-
   )
 
 metadata(d_share)$name <- "Analysed data for Aim 1 of \"Pregnancy during the pandemic\\: The impact of COVID-19-related stress on risk for prenatal depression\" (King et al. 2020)"
+
+d_share <-
+  d_share %>% 
+  mutate(
+    git_id = 1:813
+  ) %>% 
+  dplyr::select(git_id, everything(), -ID)
 
 write_csv(
   d_share,

@@ -89,14 +89,15 @@ babies <-
   ) %>% 
   left_join(
     read_csv(babies_epds_file) %>% 
-      dplyr::select(-epds_t3, -epds_t3_concern),
+      dplyr::select(ID, epds_total_t1, epds_3a_t1),
     by = "ID"
   ) %>% 
   mutate(cohort = "Pre-pandemic") %>% 
   dplyr::select(
     ID,
     cohort,
-    epds_total = epds_t1,
+    epds_total = epds_total_t1,
+    epds_3A = epds_3a_t1,
     everything()
   ) %>% 
   mutate(
@@ -186,8 +187,13 @@ cope <-
       past_mh_sa_treatment,
       "past treatment" = 1,
       "none" = 0
-    )
+    ),
+    epds_3A = mean(
+      c(epds_3, epds_4, epds_5),
+      na.rm = TRUE
+    ) * 3
   ) 
+
 ```
 
 ## Join BABIES and COPE
@@ -381,6 +387,23 @@ d %>%
 d %>% 
   filter(cohort == "Pre-pandemic") %>% 
   count(past_mh_sa_treatment) %>% 
+  mutate(per = n / sum(n))
+```
+
+```{r}
+d %>% 
+  filter(cohort == "Pre-pandemic") %>% 
+  count(epds_total >= 11) %>% 
+  mutate(per = n / sum(n))
+
+d %>% 
+  filter(cohort == "Pre-pandemic") %>% 
+  count(epds_total >= 13) %>% 
+  mutate(per = n / sum(n))
+
+d %>% 
+  filter(cohort == "Pre-pandemic") %>% 
+  count(epds_total >= 15) %>% 
   mutate(per = n / sum(n))
 ```
 
@@ -792,14 +815,12 @@ epds_cutoff_table <-
 epds_cutoff_table
 
 # relative risk of COPE vs. BABIES
-depression_cope <- epds_cutoff_table[2, 4] %>% pull()
-depression_babies <- epds_cutoff_table[4, 4] %>% pull()
-RR <- depression_cope / depression_babies
-RR
+effectsize::riskratio(table(fct_rev(d_matched$cohort), d_matched$epds_above_cutoff))
 ```
 
 ## Visualize main effect
 ```{r}
+# color 
 d_matched %>% 
   ggplot(aes(x = fct_rev(cohort), y = epds_total, fill = cohort)) +
   geom_flat_violin(
@@ -850,7 +871,61 @@ ggsave(
   height = 5,
   dpi = 1000
 )
+
+
+# black and white
+d_matched %>% 
+  ggplot(aes(x = fct_rev(cohort), y = epds_total, fill = cohort)) +
+  geom_flat_violin(
+    aes(fill = cohort),
+    position = position_nudge(x = .21, y = 0), 
+    adjust = 1.5, 
+    trim = TRUE, 
+    alpha = .65, 
+    colour = NA
+  ) +
+  geom_point(
+    aes(x = as.numeric(fct_rev(cohort))-.26, y = epds_total, color = cohort),
+    position = position_jitter(width = .05), 
+    size = 2,
+    alpha = .65,
+    shape = 20
+  ) +
+  geom_boxplot(
+    aes(x = fct_rev(cohort), y = epds_total, fill = cohort),
+    outlier.shape = NA, 
+    alpha = .65, 
+    width = .4, 
+    colour = "black"
+  ) +
+  # remove grid lines, etc.
+  theme_pubr() +
+  # adjust size and position of labels
+  theme(
+    axis.title.y = element_text(size = 20),
+    axis.title.x = element_text(size = 20),
+    axis.text.y = element_text(size = 16),
+    axis.text.x = element_text(size = 16),
+    # remove legend
+    legend.position = "none"
+  ) +
+  # change names of labels
+  labs(
+    x = "Cohort",
+    y = "Prenatal depressive symptoms\n(EPDS)"
+  ) +
+  # add color pallete
+  scale_color_grey(start = 0, end = .6) +
+  scale_fill_grey(start = 0, end = .6)
+
+ggsave(
+  "~/Box/lucy_king_files/BABIES/cope/figures/babies_cope_epds_BW.jpeg",
+  width = 6,
+  height = 5,
+  dpi = 1000
+)
 ```
+
 # Compare participants in COVID-19 subset to participants in full cohort
 ```{r}
 d_matched <-
@@ -921,6 +996,139 @@ ggsave(
 )
 ```
 
+# Additional analyses at reviewer request
+
+## Aim 1 analysis with all available data 
+```{r}
+d <-
+  d %>% 
+  mutate_at(
+    vars(college_or_higher, employed, poc, first_pregnancy, past_mh_sa_treatment, partnered, low_income),
+    as.factor
+  )
+
+contrasts(d$cohort) <- c(1, 0)
+
+contrasts(d$low_income) <- c(-.5, .5)
+
+contrasts(d$college_or_higher) <- c(-.5, .5)
+
+contrasts(d$employed) <- c(-.5, .5)
+
+contrasts(d$first_pregnancy) <- c(-.5, .5)
+
+contrasts(d$past_mh_sa_treatment) <- c(-.5, .5)
+
+contrasts(d$partnered) <- c(-.5, .5)
+```
+
+```{r}
+lm_a1_all <- 
+  lm(
+  epds_total ~
+    cohort +
+    low_income +
+    college_or_higher +
+    employed +
+    first_pregnancy +
+    past_mh_sa_treatment +
+    partnered +
+    poc +
+    scale(mom_age, scale = FALSE) +
+    scale(gestational_weeks, scale = FALSE) +
+    scale(ppl_in_home_allchild, scale = FALSE),
+  data = d
+)
+summary(lm_a1_all)
+model_parameters(lm_a1_all, standardize = "refit")
+```
+
+## Associations between gestational weeks and depressive symptoms
+```{r}
+cor.test(babies$epds_total, babies$gestational_weeks)
+cor.test(cope$epds_total, cope$gestational_weeks)
+```
+
+## Aim 1 by phases of pregnancy
+```{r}
+max_gestational_weeks <- max(d_matched$gestational_weeks, na.rm = TRUE)
+
+d_matched <-
+  d_matched %>% 
+  mutate(
+    trimester = as.factor(
+      case_when(
+        gestational_weeks < 14 ~ "first",
+        gestational_weeks >= 14 & gestational_weeks < 26 ~ "second",
+        gestational_weeks >= 16 & gestational_weeks <= max_gestational_weeks ~ "third",
+      )
+    ),
+    pregnancy_stage = as.factor(
+      case_when(
+        gestational_weeks <= 20 ~ "earlier", 
+        gestational_weeks > 20 & gestational_weeks <= max_gestational_weeks ~ "later"
+      )
+    )
+  )
+
+d_matched %>% 
+  count(cohort, trimester)
+
+d_matched %>% 
+  count(cohort, pregnancy_stage)
+```
+
+```{r}
+contrasts(d_matched$pregnancy_stage) = c(0, 1) # earlier is baseline
+
+# test interaction
+lm_aim1_stage <-
+  lm(
+    epds_total ~ 
+      cohort * pregnancy_stage,
+    data = d_matched
+  )
+
+summary(lm_aim1_stage)
+model_parameters(lm_aim1_stage, standardize = "refit")
+
+# test interaction
+lm_aim1_weeks <-
+  lm(
+    epds_total ~ 
+      cohort * gestational_weeks,
+    data = d_matched
+  )
+
+summary(lm_aim1_weeks)
+model_parameters(lm_aim1_weeks, standardize = "refit")
+```
+
+```{r}
+# test stratified
+d_matched_early <-
+  d_matched %>% 
+  filter(pregnancy_stage =="earlier")
+
+t.test(d_matched_early$epds_total ~ d_matched_early$cohort)
+cohens_d(d_matched_early$epds_total, d_matched_early$cohort)
+
+d_matched_later <-
+  d_matched %>% 
+  filter(pregnancy_stage =="later")
+
+t.test(d_matched_later$epds_total ~ d_matched_later$cohort)
+cohens_d(d_matched_later$epds_total, d_matched_later$cohort)
+```
+
+## EPDS 3A: Anxiety symptoms
+
+```{r}
+t.test(d_matched$epds_3A ~ d_matched$cohort)
+cohens_d(d_matched$epds_3A, d_matched$cohort)
+```
+
+
 # Export data to share
 ```{r}
 matched_COPE_IDs <-
@@ -943,6 +1151,7 @@ d_share <-
     ID,
     cohort,
     epds_total,
+    epds_3A,
     mom_age,
     mom_race,
     mom_latinx,
@@ -990,6 +1199,13 @@ var_label(d_share) <-
   )
 
 metadata(d_share)$name <- "Analysed data for Aim 1 of \"Pregnancy during the pandemic\\: The impact of COVID-19-related stress on risk for prenatal depression\" (King et al. 2020)"
+
+d_share <-
+  d_share %>% 
+  mutate(
+    git_id = 1:813
+  ) %>% 
+  dplyr::select(git_id, everything(), -ID)
 
 write_csv(
   d_share,

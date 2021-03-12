@@ -902,6 +902,20 @@ z_score <- function(x) {
 ```
 
 ```{r}
+cal_env_vars <-
+  cc2_preg_cal %>% 
+  dplyr::select(
+    asthma_pctl,
+    low_birth_weight_pctl,
+    cardio_disease_pctl,
+    education_ce_pctl,
+    poverty_pctl,
+    housing_burden_pctl,
+    linguistic_isolation_pctl,
+    unemployment_ce_pctl
+  ) %>% 
+  names()
+
 cc2_preg_cal_en <-
   cc2_preg_cal %>% 
   dplyr::select(
@@ -2014,6 +2028,79 @@ SpearmanRho(cc2_preg$epds_total, cc2_preg$impact_covid_rating, use = "pairwise.c
 SpearmanRho(cc2_preg$epds_total, cc2_preg$impact_covid_valence, use = "pairwise.complete.obs", conf.level = .95)
 
 cor.test(cc2_preg$epds_total, cc2_preg$reduced_access_distress)
+```
+
+# Additional analyses by reviewer request
+
+## Gestational weeks and stress and adversity
+```{r}
+cor.test(cc2_preg$f1_score, cc2_preg$gestational_weeks)
+cor.test(cc2_preg$f2_score, cc2_preg$gestational_weeks)
+```
+
+## Aim 4 by phases of pregnancy
+```{r}
+max_gestational_weeks <- max(cc2_preg$gestational_weeks, na.rm = TRUE)
+
+cc2_preg <-
+  cc2_preg %>% 
+  mutate(
+    trimester = as.factor(
+      case_when(
+        gestational_weeks < 14 ~ "first",
+        gestational_weeks >= 14 & gestational_weeks < 26 ~ "second",
+        gestational_weeks >= 16 & gestational_weeks <= max_gestational_weeks ~ "third",
+      )
+    ),
+    pregnancy_stage = as.factor(
+      case_when(
+        gestational_weeks <= 20 ~ "earlier", 
+        gestational_weeks > 20 & gestational_weeks <= max_gestational_weeks ~ "later"
+      )
+    )
+  )
+
+cc2_preg %>% 
+  count(trimester)
+
+cc2_preg %>% 
+  count(pregnancy_stage)
+```
+
+```{r}
+cc2_preg_earlier <-
+  cc2_preg %>% 
+  filter(pregnancy_stage == "earlier")
+
+epds_lm_earlier <-
+  lm(
+    scale(epds_total) ~
+      scale(f1_score) +
+      scale(f2_score),
+    data = cc2_preg_earlier
+  )
+
+summary(epds_lm_earlier)
+model_parameters(epds_lm_earlier, bootstrap = TRUE)
+calc.relimp(epds_lm_earlier)
+```
+
+```{r}
+cc2_preg_later <-
+  cc2_preg %>% 
+  filter(pregnancy_stage == "later")
+
+epds_lm_later <-
+  lm(
+    scale(epds_total) ~
+      scale(f1_score) +
+      scale(f2_score),
+    data = cc2_preg_later
+  )
+
+summary(epds_lm_later)
+model_parameters(epds_lm_later, bootstrap = TRUE)
+calc.relimp(epds_lm_later)
 ```
 
 # Export data for sharing
